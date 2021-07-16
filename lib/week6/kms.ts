@@ -59,6 +59,8 @@ export class KmsStack extends cdk.Stack {
       },
     });
 
+    mysql.connections.allowDefaultPortFromAnyIpv4();
+
     const temp_user_data = ec2.UserData.forLinux();
     temp_user_data.addCommands("yum install -y mysql jq");
     temp_user_data.addCommands(
@@ -94,8 +96,6 @@ export class KmsStack extends cdk.Stack {
     temp_instance.role.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName("AdministratorAccess")
     );
-
-    mysql.connections.allowDefaultPortFrom(temp_instance);
 
     const user_data = ec2.UserData.forLinux();
     user_data.addCommands("yum install -y mysql jq");
