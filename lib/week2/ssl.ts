@@ -36,7 +36,7 @@ export class SslStack extends cdk.Stack {
     user_data.addCommands(
       "yum update -y && yum install -y httpd git mod_wsgi python3-3.7*"
     );
-    user_data.addCommands("pip3 install flask");
+    user_data.addCommands("pip3 install Flask==1.1.4");
     user_data.addCommands(
       "git clone https://github.com/youngwjung/flask-ssl.git /var/www/html/"
     );
