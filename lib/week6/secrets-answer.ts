@@ -1,17 +1,18 @@
-import * as cdk from "@aws-cdk/core";
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
-import { InstanceTarget } from "@aws-cdk/aws-elasticloadbalancingv2-targets";
-import * as secretsmanager from "@aws-cdk/aws-secretsmanager";
-import * as waf from "@aws-cdk/aws-wafv2";
-import * as cloudfront from "@aws-cdk/aws-cloudfront";
-import * as origins from "@aws-cdk/aws-cloudfront-origins";
-import * as iam from "@aws-cdk/aws-iam";
-import * as lambda from "@aws-cdk/aws-lambda";
-import { CfnOutput } from "@aws-cdk/core";
+import * as cdk from "aws-cdk-lib";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import { InstanceTarget } from "aws-cdk-lib/aws-elasticloadbalancingv2-targets";
+import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
+import * as waf from "aws-cdk-lib/aws-wafv2";
+import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
+import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
+import * as iam from "aws-cdk-lib/aws-iam";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import { CfnOutput } from "aws-cdk-lib";
+import { Construct } from "constructs";
 
 export class SecretsAnswerStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     const vpc = new ec2.Vpc(this, "vpc", {

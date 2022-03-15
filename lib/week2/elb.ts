@@ -1,13 +1,14 @@
-import * as cdk from "@aws-cdk/core";
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
-import * as route53 from "@aws-cdk/aws-route53";
-import { CfnOutput } from "@aws-cdk/core";
-import { InstanceTarget } from "@aws-cdk/aws-elasticloadbalancingv2-targets";
-import { LoadBalancerTarget } from "@aws-cdk/aws-route53-targets";
+import * as cdk from "aws-cdk-lib";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import * as route53 from "aws-cdk-lib/aws-route53";
+import { CfnOutput } from "aws-cdk-lib";
+import { InstanceTarget } from "aws-cdk-lib/aws-elasticloadbalancingv2-targets";
+import { LoadBalancerTarget } from "aws-cdk-lib/aws-route53-targets";
+import { Construct } from "constructs";
 
 export class ElbStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     const keypair = new cdk.CfnParameter(this, "keypair", {
@@ -70,10 +71,10 @@ export class ElbStack extends cdk.Stack {
       open: true,
     });
 
-    http_listener.addTargets('web_target', {
+    http_listener.addTargets("web_target", {
       port: 80,
-      targets: [new InstanceTarget(instance)]
-    })
+      targets: [new InstanceTarget(instance)],
+    });
 
     instance.connections.allowFrom(lb, ec2.Port.tcp(80));
 

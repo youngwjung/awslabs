@@ -1,13 +1,14 @@
-import * as cdk from "@aws-cdk/core";
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
-import * as route53 from "@aws-cdk/aws-route53";
-import { CfnOutput } from "@aws-cdk/core";
-import { InstanceTarget } from "@aws-cdk/aws-elasticloadbalancingv2-targets";
-import { LoadBalancerTarget } from "@aws-cdk/aws-route53-targets";
+import * as cdk from "aws-cdk-lib";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import * as route53 from "aws-cdk-lib/aws-route53";
+import { CfnOutput } from "aws-cdk-lib";
+import { InstanceTarget } from "aws-cdk-lib/aws-elasticloadbalancingv2-targets";
+import { LoadBalancerTarget } from "aws-cdk-lib/aws-route53-targets";
+import { Construct } from "constructs";
 
 export class ColorStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     const domain_name = new cdk.CfnParameter(this, "domainName", {
@@ -39,7 +40,9 @@ export class ColorStack extends cdk.Stack {
       "echo '<h1>Hi! I am green</h1>' >> /tmp/index.html"
     );
     green_user_data.addCommands("cp /tmp/index.html /var/www/html/");
-    green_user_data.addCommands("mkdir /var/www/html/green && mv /tmp/index.html /var/www/html/green/");
+    green_user_data.addCommands(
+      "mkdir /var/www/html/green && mv /tmp/index.html /var/www/html/green/"
+    );
     green_user_data.addCommands("systemctl enable httpd");
     green_user_data.addCommands("systemctl start httpd");
 
@@ -64,7 +67,9 @@ export class ColorStack extends cdk.Stack {
       "echo '<h1>Hi! I am blue</h1>' >> /tmp/index.html"
     );
     blue_user_data.addCommands("cp /tmp/index.html /var/www/html/");
-    blue_user_data.addCommands("mkdir /var/www/html/blue && mv /tmp/index.html /var/www/html/blue/");
+    blue_user_data.addCommands(
+      "mkdir /var/www/html/blue && mv /tmp/index.html /var/www/html/blue/"
+    );
     blue_user_data.addCommands("systemctl enable httpd");
     blue_user_data.addCommands("systemctl start httpd");
 

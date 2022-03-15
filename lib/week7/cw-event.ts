@@ -1,11 +1,12 @@
-import * as cdk from "@aws-cdk/core";
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as autoscaling from "@aws-cdk/aws-autoscaling";
-import * as lambda from "@aws-cdk/aws-lambda";
-import { CfnOutput } from "@aws-cdk/core";
+import * as cdk from "aws-cdk-lib";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as autoscaling from "aws-cdk-lib/aws-autoscaling";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import { CfnOutput } from "aws-cdk-lib";
+import { Construct } from "constructs";
 
 export class CweventStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     const vpc = new ec2.Vpc(this, "vpc", {

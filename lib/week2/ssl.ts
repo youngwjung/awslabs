@@ -1,10 +1,11 @@
-import * as cdk from "@aws-cdk/core";
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as route53 from "@aws-cdk/aws-route53";
-import { CfnOutput } from "@aws-cdk/core";
+import * as cdk from "aws-cdk-lib";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as route53 from "aws-cdk-lib/aws-route53";
+import { CfnOutput } from "aws-cdk-lib";
+import { Construct } from "constructs";
 
 export class SslStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     const keypair = new cdk.CfnParameter(this, "keypair", {
@@ -73,8 +74,8 @@ export class SslStack extends cdk.Stack {
       recordName: "ssl",
     });
 
-    new CfnOutput(this, 'output_site_url', {
-      value: site_url.domainName
-    })
+    new CfnOutput(this, "output_site_url", {
+      value: site_url.domainName,
+    });
   }
 }

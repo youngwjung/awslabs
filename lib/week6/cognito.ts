@@ -1,12 +1,13 @@
-import * as cdk from "@aws-cdk/core";
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as cognito from "@aws-cdk/aws-cognito";
-import * as s3 from "@aws-cdk/aws-s3";
-import * as iam from "@aws-cdk/aws-iam";
-import { CfnOutput } from "@aws-cdk/core";
+import * as cdk from "aws-cdk-lib";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as cognito from "aws-cdk-lib/aws-cognito";
+import * as s3 from "aws-cdk-lib/aws-s3";
+import * as iam from "aws-cdk-lib/aws-iam";
+import { CfnOutput } from "aws-cdk-lib";
+import { Construct } from "constructs";
 
 export class CognitoStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     const vpc = new ec2.Vpc(this, "vpc", {
@@ -35,7 +36,9 @@ export class CognitoStack extends cdk.Stack {
     });
 
     instance.role.addManagedPolicy(
-      iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AmazonEC2RoleforSSM")
+      iam.ManagedPolicy.fromAwsManagedPolicyName(
+        "service-role/AmazonEC2RoleforSSM"
+      )
     );
 
     const user_pool = new cognito.UserPool(this, "user_pool");
@@ -82,17 +85,18 @@ export class CognitoStack extends cdk.Stack {
       ),
     });
 
-    const identity_pool_role_attachment = new cognito.CfnIdentityPoolRoleAttachment(
-      this,
-      "identity_pool_role_attachment",
-      {
-        identityPoolId: identity_pool.ref,
-        roles: {
-          unauthenticated: unauthenticated_role.roleArn,
-          authenticated: authenticated_role.roleArn,
-        },
-      }
-    );
+    const identity_pool_role_attachment =
+      new cognito.CfnIdentityPoolRoleAttachment(
+        this,
+        "identity_pool_role_attachment",
+        {
+          identityPoolId: identity_pool.ref,
+          roles: {
+            unauthenticated: unauthenticated_role.roleArn,
+            authenticated: authenticated_role.roleArn,
+          },
+        }
+      );
 
     const bucket = new s3.Bucket(this, "bucket", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,

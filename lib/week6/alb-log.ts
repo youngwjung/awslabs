@@ -1,13 +1,14 @@
-import * as cdk from "@aws-cdk/core";
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as elbv2 from "@aws-cdk/aws-elasticloadbalancingv2";
-import * as autoscaling from "@aws-cdk/aws-autoscaling";
-import * as s3 from "@aws-cdk/aws-s3";
-import { CfnOutput } from "@aws-cdk/core";
-import { InstanceTarget } from "@aws-cdk/aws-elasticloadbalancingv2-targets";
+import * as cdk from "aws-cdk-lib";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
+import * as autoscaling from "aws-cdk-lib/aws-autoscaling";
+import * as s3 from "aws-cdk-lib/aws-s3";
+import { CfnOutput } from "aws-cdk-lib";
+import { InstanceTarget } from "aws-cdk-lib/aws-elasticloadbalancingv2-targets";
+import { Construct } from "constructs";
 
 export class AlblogStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     const vpc = new ec2.Vpc(this, "vpc", {

@@ -1,14 +1,14 @@
-import * as cdk from "@aws-cdk/core";
-import * as ec2 from "@aws-cdk/aws-ec2";
-import * as autoscaling from "@aws-cdk/aws-autoscaling";
-import * as sqs from "@aws-cdk/aws-sqs";
-import * as cw from "@aws-cdk/aws-cloudwatch";
-import * as ssm from "@aws-cdk/aws-ssm";
-import * as iam from "@aws-cdk/aws-iam";
-import { AutoScalingAction } from "@aws-cdk/aws-cloudwatch-actions";
+import * as cdk from "aws-cdk-lib";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as autoscaling from "aws-cdk-lib/aws-autoscaling";
+import * as sqs from "aws-cdk-lib/aws-sqs";
+import * as cw from "aws-cdk-lib/aws-cloudwatch";
+import * as ssm from "aws-cdk-lib/aws-ssm";
+import * as iam from "aws-cdk-lib/aws-iam";
+import { Construct } from "constructs";
 
 export class SqsStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
     const vpc = new ec2.Vpc(this, "vpc", {
