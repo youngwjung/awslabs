@@ -27,6 +27,8 @@ import { CweventStack } from "../lib/week7/cw-event";
 import { PortforwadingStack } from "../lib/week7/port-forwarding";
 import { ConfigStack } from "../lib/week7/config";
 
+import { KinesisStack } from "../lib/data/kinesis";
+
 const app = new cdk.App();
 new EipStack(app, "eip");
 new EbsStack(app, "ebs");
@@ -58,3 +60,5 @@ new CwmetricStack(app, "cw-metric");
 new CweventStack(app, "cw-event");
 new PortforwadingStack(app, "port-forwarding");
 new ConfigStack(app, "config");
+
+new KinesisStack(app, "kinesis");
