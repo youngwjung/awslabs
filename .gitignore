@@ -11,4 +11,4 @@ cdk.out
 cdk.context.json
 
 # Bash script
-deploy.sh
+*.sh
