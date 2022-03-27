@@ -1,5 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as cloud9 from "aws-cdk-lib/aws-cloud9";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as glue from "aws-cdk-lib/aws-glue";
@@ -19,10 +20,21 @@ export class KinesisStack extends cdk.Stack {
       userName: "lab-user",
     });
 
+    const vpc = new ec2.Vpc(this, "vpc", {
+      natGateways: 0,
+      subnetConfiguration: [
+        {
+          name: "public",
+          subnetType: ec2.SubnetType.PUBLIC,
+        },
+      ],
+    });
+
     const cloud9Instance = new cloud9.CfnEnvironmentEC2(
       this,
       "cloud9Instance",
       {
+        subnetId: vpc.publicSubnets[0].subnetId,
         instanceType: "t3.micro",
         name: "kinesis-lab",
         ownerArn: iamUser.userArn,
