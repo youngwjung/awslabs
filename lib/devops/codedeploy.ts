@@ -94,29 +94,6 @@ export class CodeDeployStack extends cdk.Stack {
       systemctl start codedeploy-agent
       `
     );
-    // user_data.addCommands(
-    //   "sudo yum install -y httpd httpd-devel postgresql python3 python3-devel gcc",
-    //   "cd /opt && python3 -m venv venv",
-    //   "source /opt/venv/bin/activate && pip install mod_wsgi",
-    //   "sudo systemctl enable httpd",
-    //   "sudo systemctl start httpd",
-    //   "sudo yum install -y ruby wget",
-    //   "wget https://aws-codedeploy-ap-northeast-2.s3.ap-northeast-2.amazonaws.com/latest/install",
-    //   "chmod +x ./install",
-    //   "sudo ./install auto",
-    //   "sudo systemctl enable codedeploy-agent",
-    //   "sudo systemctl start codedeploy-agent",
-    // )
-    // user_data.addCommands("yum update -y && yum install -y httpd httpd-devel postgresql python3 python3-devel gcc ruby wget");
-    // user_data.addCommands("cd /opt && python3 -m venv venv");
-    // user_data.addCommands("source /opt/venv/bin/activate && pip install mod_wsgi");
-    // user_data.addCommands("systemctl enable httpd");
-    // user_data.addCommands("systemctl start httpd");
-    // user_data.addCommands("wget https://aws-codedeploy-ap-northeast-2.s3.ap-northeast-2.amazonaws.com/latest/install");
-    // user_data.addCommands("chmod +x ./install");
-    // user_data.addCommands("./install auto");
-    // user_data.addCommands("systemctl enable codedeploy-agent");
-    // user_data.addCommands("systemctl start codedeploy-agent");
 
     const asg = new autoscaling.AutoScalingGroup(this, "locallibrary-prod", {
       autoScalingGroupName: "locallibrary-prod",
