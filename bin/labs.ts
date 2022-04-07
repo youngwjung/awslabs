@@ -28,6 +28,8 @@ import { PortforwadingStack } from "../lib/week7/port-forwarding";
 import { ConfigStack } from "../lib/week7/config";
 
 import { KinesisStack } from "../lib/data/kinesis";
+import { CodeCommitStack } from "../lib/devops/codecommit";
+import { CodeDeployStack } from "../lib/devops/codedeploy";
 
 const app = new cdk.App();
 new EipStack(app, "eip");
@@ -62,3 +64,5 @@ new PortforwadingStack(app, "port-forwarding");
 new ConfigStack(app, "config");
 
 new KinesisStack(app, "kinesis");
+new CodeCommitStack(app, "codecommit");
+new CodeDeployStack(app, "codedeploy");
