@@ -30,6 +30,7 @@ import { ConfigStack } from "../lib/week7/config";
 import { KinesisStack } from "../lib/data/kinesis";
 import { CodeCommitStack } from "../lib/devops/codecommit";
 import { CodeDeployStack } from "../lib/devops/codedeploy";
+import { Eks101Stack } from "../lib/kubermetes/eks101";
 
 const app = new cdk.App();
 new EipStack(app, "eip");
@@ -66,3 +67,4 @@ new ConfigStack(app, "config");
 new KinesisStack(app, "kinesis");
 new CodeCommitStack(app, "codecommit");
 new CodeDeployStack(app, "codedeploy");
+new Eks101Stack(app, "eks101");
