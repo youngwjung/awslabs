@@ -31,6 +31,7 @@ import { KinesisStack } from "../lib/data/kinesis";
 import { CodeCommitStack } from "../lib/devops/codecommit";
 import { CodeDeployStack } from "../lib/devops/codedeploy";
 import { Eks101Stack } from "../lib/kubermetes/eks101";
+import { Eks101EventEngineStack } from "../lib/kubermetes/eks101-eventengine";
 
 const app = new cdk.App();
 new EipStack(app, "eip");
@@ -68,3 +69,4 @@ new KinesisStack(app, "kinesis");
 new CodeCommitStack(app, "codecommit");
 new CodeDeployStack(app, "codedeploy");
 new Eks101Stack(app, "eks101");
+new Eks101EventEngineStack(app, "eks101-event");

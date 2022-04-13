@@ -6,7 +6,7 @@ import * as cloud9 from "aws-cdk-lib/aws-cloud9";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as cr from "aws-cdk-lib/custom-resources";
 
-export class Eks101Stack extends cdk.Stack {
+export class Eks101EventEngineStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -23,18 +23,6 @@ export class Eks101Stack extends cdk.Stack {
     });
 
     /* IAM */
-    const eksLabRole = new iam.Role(this, "eksLabRole", {
-      roleName: "EKSLabRole",
-      assumedBy: new iam.CompositePrincipal(
-        new iam.AccountPrincipal(this.account)
-      ),
-      maxSessionDuration: cdk.Duration.seconds(43200),
-    });
-
-    eksLabRole.addManagedPolicy(
-      iam.ManagedPolicy.fromAwsManagedPolicyName("AdministratorAccess")
-    );
-
     const eksMasterRole = new iam.Role(this, "eksMasterRole", {
       roleName: "eks-master-role",
       assumedBy: new iam.ServicePrincipal("ec2"),
@@ -61,7 +49,7 @@ export class Eks101Stack extends cdk.Stack {
         subnetId: vpc.publicSubnets[0].subnetId,
         instanceType: "t3.micro",
         name: "eks-lab",
-        ownerArn: `arn:aws:sts::${this.account}:assumed-role/${eksLabRole.roleName}/${this.stackName}`,
+        ownerArn: `arn:aws:sts::${this.account}:assumed-role/TeamRole/MasterKey`,
         automaticStopTimeMinutes: 30,
       }
     );
@@ -109,38 +97,5 @@ export class Eks101Stack extends cdk.Stack {
         "service-role/AmazonEC2RoleforSSM"
       )
     );
-
-    /* Login URL */
-    const loginUrlGenerator = new lambda.Function(this, "loginUrlGenerator", {
-      runtime: lambda.Runtime.PYTHON_3_9,
-      code: lambda.Code.fromAsset("lambda/ekslab"),
-      handler: "app.on_event",
-    });
-
-    loginUrlGenerator.addToRolePolicy(
-      new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        actions: ["sts:AssumeRole"],
-        resources: ["*"],
-      })
-    );
-
-    const loginUrlProvider = new cr.Provider(this, "loginUrlProvider", {
-      onEventHandler: loginUrlGenerator,
-    });
-
-    const loginUrl = new cdk.CustomResource(this, "CustomResource", {
-      serviceToken: loginUrlProvider.serviceToken,
-      properties: {
-        RoleName: eksLabRole.roleName,
-        RoleSessionName: this.stackName,
-      },
-    });
-
-    loginUrl.node.addDependency(nodeGroup);
-
-    new cdk.CfnOutput(this, "SignInURL", {
-      value: loginUrl.getAtt("SignInURL").toString(),
-    });
   }
 }
