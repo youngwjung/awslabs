@@ -93,7 +93,7 @@ export class Eks101Stack extends cdk.Stack {
       subnets: {
         subnetType: ec2.SubnetType.PUBLIC,
       },
-      minSize: 1,
+      minSize: 2,
       maxSize: 10,
     });
 
