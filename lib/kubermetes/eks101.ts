@@ -111,18 +111,30 @@ export class Eks101Stack extends cdk.Stack {
     );
 
     /* Login URL */
-    const loginUrlGenerator = new lambda.Function(this, "loginUrlGenerator", {
-      runtime: lambda.Runtime.PYTHON_3_9,
-      code: lambda.Code.fromAsset("lambda/ekslab"),
-      handler: "app.on_event",
-    });
+    const adminUser = new iam.User(this, "adminUser");
 
-    loginUrlGenerator.addToRolePolicy(
+    adminUser.addToPolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ["sts:AssumeRole"],
         resources: ["*"],
       })
+    );
+
+    const adminUserCred = new iam.AccessKey(this, "adminUserCred", {
+      user: adminUser,
+    });
+
+    const loginUrlGenerator = new lambda.Function(this, "loginUrlGenerator", {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      code: lambda.Code.fromAsset("lambda/ekslab"),
+      handler: "app.on_event",
+      timeout: cdk.Duration.seconds(60),
+    });
+
+    // const loginUrlGeneratorRole = loginUrlGenerator.role;
+    loginUrlGenerator.role!.addManagedPolicy(
+      iam.ManagedPolicy.fromAwsManagedPolicyName("IAMReadOnlyAccess")
     );
 
     const loginUrlProvider = new cr.Provider(this, "loginUrlProvider", {
@@ -134,6 +146,9 @@ export class Eks101Stack extends cdk.Stack {
       properties: {
         RoleName: eksLabRole.roleName,
         RoleSessionName: this.stackName,
+        UserName: adminUser.userName,
+        AccessKeyId: adminUserCred.accessKeyId,
+        SecretAccessKey: adminUserCred.secretAccessKey.toString(),
       },
     });
 

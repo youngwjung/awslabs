@@ -2,6 +2,7 @@ import urllib
 import json
 import sys
 import boto3
+import time
 from urllib.request import urlopen
 from urllib.parse import quote_plus
 
@@ -15,17 +16,30 @@ def on_event(event, context):
 
 
 def on_create(event):
-    sts = boto3.client('sts')
-    account_id = sts.get_caller_identity().get('Account')
-
     props = event['ResourceProperties']
-    print(event)
+
+    iam = boto3.client('iam')
+    response = iam.list_access_keys(
+        UserName=props['UserName']
+    )
+
+    while True:
+        if response['AccessKeyMetadata'][0]['Status'] == "Active":
+            time.sleep(1)
+            break
+
+    sts = boto3.client(
+        'sts',
+        aws_access_key_id=props['AccessKeyId'],
+        aws_secret_access_key=props['SecretAccessKey']
+    )
+    account_id = sts.get_caller_identity().get('Account')
 
     assumed_role_object = sts.assume_role(
         RoleArn=f"arn:aws:iam::{account_id}:role/{props['RoleName']}",
         RoleSessionName=props['RoleSessionName'],
+        DurationSeconds=43200
     )
-    print(assumed_role_object)
 
     url_credentials = {}
     url_credentials['sessionId'] = assumed_role_object.get(
