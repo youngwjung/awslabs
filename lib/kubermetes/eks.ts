@@ -6,7 +6,7 @@ import * as cloud9 from "aws-cdk-lib/aws-cloud9";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as cr from "aws-cdk-lib/custom-resources";
 
-export class Eks101Stack extends cdk.Stack {
+export class EksStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
