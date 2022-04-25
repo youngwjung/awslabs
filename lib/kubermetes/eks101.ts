@@ -37,7 +37,10 @@ export class Eks101Stack extends cdk.Stack {
 
     const eksMasterRole = new iam.Role(this, "eksMasterRole", {
       roleName: "eks-master-role",
-      assumedBy: new iam.ServicePrincipal("ec2"),
+      assumedBy: new iam.CompositePrincipal(
+        new iam.AccountPrincipal(this.account),
+        new iam.ServicePrincipal("ec2")
+      ),
     });
 
     const eksMasterRoleProfile = new iam.CfnInstanceProfile(
