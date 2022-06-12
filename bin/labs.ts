@@ -32,6 +32,7 @@ import { CodeCommitStack } from "../lib/devops/codecommit";
 import { CodeDeployStack } from "../lib/devops/codedeploy";
 import { EksStack } from "../lib/kubermetes/eks";
 import { Eks101EventEngineStack } from "../lib/kubermetes/eks101-eventengine";
+import { ServerlessStack } from "../lib/msa/serverless";
 
 const app = new cdk.App();
 new EipStack(app, "eip");
@@ -70,3 +71,4 @@ new CodeCommitStack(app, "codecommit");
 new CodeDeployStack(app, "codedeploy");
 new EksStack(app, "eks");
 new Eks101EventEngineStack(app, "eks101-event");
+new ServerlessStack(app, "serverless");
