@@ -64,7 +64,7 @@ export class CodeCommitStack extends cdk.Stack {
         iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMFullAccess"),
         iam.ManagedPolicy.fromAwsManagedPolicyName("IAMFullAccess"),
       ],
-      password: cdk.SecretValue.plainText("Asdf!234"),
+      password: cdk.SecretValue.unsafePlainText("Asdf!234"),
       userName: "lead",
     });
 
@@ -72,7 +72,7 @@ export class CodeCommitStack extends cdk.Stack {
       managedPolicies: [
         iam.ManagedPolicy.fromAwsManagedPolicyName("AdministratorAccess"),
       ],
-      password: cdk.SecretValue.plainText("Asdf!234"),
+      password: cdk.SecretValue.unsafePlainText("Asdf!234"),
       userName: "dev",
     });
 

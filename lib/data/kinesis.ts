@@ -16,7 +16,7 @@ export class KinesisStack extends cdk.Stack {
       managedPolicies: [
         iam.ManagedPolicy.fromAwsManagedPolicyName("AdministratorAccess"),
       ],
-      password: cdk.SecretValue.plainText("Asdf!234"),
+      password: cdk.SecretValue.unsafePlainText("Asdf!234"),
       userName: "lab-user",
     });
 
