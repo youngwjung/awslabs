@@ -2,7 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import { Bucket } from "aws-cdk-lib/aws-s3";
-import { CfnOutput } from "aws-cdk-lib";
+import { CfnOutput, RemovalPolicy } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
 export class CliStack extends cdk.Stack {
@@ -59,7 +59,10 @@ export class CliStack extends cdk.Stack {
       iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonEC2FullAccess")
     );
 
-    const bucket = new Bucket(this, "bucket");
+    const bucket = new Bucket(this, "bucket", {
+      autoDeleteObjects: true,
+      removalPolicy: RemovalPolicy.DESTROY,
+    });
 
     const output = new CfnOutput(this, "BucketName", {
       value: bucket.bucketName,
