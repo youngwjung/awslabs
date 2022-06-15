@@ -28,6 +28,10 @@ export class BrokenStack extends cdk.Stack {
       iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMManagedInstanceCore")
     );
 
+    role.addManagedPolicy(
+      iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonS3FullAccess")
+    );
+
     const user_data = ec2.UserData.forLinux();
     user_data.addCommands(
       "aws s3 cp s3://youngwjung/awslabs/week1-broken.sh /home/ec2-user/",
