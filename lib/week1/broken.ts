@@ -35,7 +35,8 @@ export class BrokenStack extends cdk.Stack {
     const user_data = ec2.UserData.forLinux();
     user_data.addCommands(
       "aws s3 cp s3://youngwjung/awslabs/week1-broken.sh /home/ec2-user/",
-      "bash /home/ec2-user/week1-broken.sh"
+      "bash /home/ec2-user/week1-broken.sh",
+      "rm /home/ec2-user/week1-broken.sh"
     );
 
     const instance = new ec2.Instance(this, "instance", {
