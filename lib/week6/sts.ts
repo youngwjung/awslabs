@@ -18,22 +18,22 @@ export class StsStack extends cdk.Stack {
       ],
     });
 
-    const iam_user = new iam.User(this, "iam_user");
+    const iamUser = new iam.User(this, "iamUser");
 
-    const access_key = new iam.CfnAccessKey(this, "access_key", {
-      userName: iam_user.userName,
+    const accessKey = new iam.CfnAccessKey(this, "accessKey", {
+      userName: iamUser.userName,
     });
 
-    const user_data = ec2.UserData.forLinux();
-    user_data.addCommands("mkdir /home/ec2-user/.aws");
-    user_data.addCommands(
+    const userData = ec2.UserData.forLinux();
+    userData.addCommands("mkdir /home/ec2-user/.aws");
+    userData.addCommands(
       "cat <<EOF >> /home/ec2-user/.aws/credentials",
       "[default]",
-      `aws_access_key_id=${access_key.ref}`,
-      `aws_secret_access_key=${access_key.attrSecretAccessKey}`,
+      `aws_access_key_id=${accessKey.ref}`,
+      `aws_secret_access_key=${accessKey.attrSecretAccessKey}`,
       "EOF"
     );
-    user_data.addCommands(
+    userData.addCommands(
       "cat <<EOF >> /home/ec2-user/.aws/config",
       "[default]",
       "region=$(curl http://169.254.169.254/latest/meta-data/placement/region)",
@@ -50,7 +50,7 @@ export class StsStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      userData: user_data,
+      userData: userData,
       userDataCausesReplacement: true,
     });
 
@@ -60,28 +60,28 @@ export class StsStack extends cdk.Stack {
       )
     );
 
-    const iam_role = new iam.Role(this, "iam_role", {
+    const iamRole = new iam.Role(this, "iamRole", {
       assumedBy: new iam.AccountPrincipal("287997882978"),
     });
 
-    iam_role.addManagedPolicy(
+    iamRole.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonS3ReadOnlyAccess")
     );
 
-    new CfnOutput(this, "iam_user_name", {
-      value: iam_user.userName,
+    new CfnOutput(this, "iamUserName", {
+      value: iamUser.userName,
     });
 
-    new CfnOutput(this, "iam_user_arn", {
-      value: iam_user.userArn,
+    new CfnOutput(this, "iamUserArn", {
+      value: iamUser.userArn,
     });
 
-    new CfnOutput(this, "iam_role_arn", {
-      value: iam_role.roleArn,
+    new CfnOutput(this, "iamRoleArn", {
+      value: iamRole.roleArn,
     });
 
-    new CfnOutput(this, "iam_role_name", {
-      value: iam_role.roleName,
+    new CfnOutput(this, "iamRoleName", {
+      value: iamRole.roleName,
     });
   }
 }

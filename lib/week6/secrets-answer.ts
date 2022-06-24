@@ -25,13 +25,13 @@ export class SecretsAnswerStack extends cdk.Stack {
       ],
     });
 
-    const user_data = ec2.UserData.forLinux();
-    user_data.addCommands("yum update -y && yum install -y httpd git");
-    user_data.addCommands(
+    const userData = ec2.UserData.forLinux();
+    userData.addCommands("yum update -y && yum install -y httpd git");
+    userData.addCommands(
       "cd /var/www/html && git clone https://github.com/youngwjung/static-html-sample.git ."
     );
-    user_data.addCommands("systemctl enable httpd");
-    user_data.addCommands("systemctl start httpd");
+    userData.addCommands("systemctl enable httpd");
+    userData.addCommands("systemctl start httpd");
 
     const instance = new ec2.Instance(this, "instance", {
       vpc: vpc,
@@ -42,7 +42,7 @@ export class SecretsAnswerStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      userData: user_data,
+      userData: userData,
     });
 
     const alb = new elbv2.ApplicationLoadBalancer(this, "alb", {
@@ -50,26 +50,26 @@ export class SecretsAnswerStack extends cdk.Stack {
       internetFacing: true,
     });
 
-    const http_listener = alb.addListener("http_listener", {
+    const httpListener = alb.addListener("httpListener", {
       port: 80,
       open: true,
     });
 
-    http_listener.addTargets("web_target", {
+    httpListener.addTargets("webTarget", {
       port: 80,
       targets: [new InstanceTarget(instance)],
     });
 
     instance.connections.allowFrom(alb, ec2.Port.tcp(80));
 
-    const cf_header = new secretsmanager.Secret(this, "cf_header", {
+    const cfHeader = new secretsmanager.Secret(this, "cfHeader", {
       generateSecretString: {
         excludePunctuation: true,
         passwordLength: 20,
       },
     });
 
-    const waf_alb = new waf.CfnWebACL(this, "waf_alb", {
+    const wafAlb = new waf.CfnWebACL(this, "wafAlb", {
       name: "acl-originVerify",
       scope: "REGIONAL",
       defaultAction: {
@@ -90,7 +90,7 @@ export class SecretsAnswerStack extends cdk.Stack {
                 },
               },
               positionalConstraint: "EXACTLY",
-              searchString: cf_header.secretValue.toString(),
+              searchString: cfHeader.secretValue.toString(),
               textTransformations: [
                 {
                   priority: 0,
@@ -113,16 +113,16 @@ export class SecretsAnswerStack extends cdk.Stack {
       },
     });
 
-    new waf.CfnWebACLAssociation(this, "waf_alb_association", {
+    new waf.CfnWebACLAssociation(this, "wafAlbAssociation", {
       resourceArn: alb.loadBalancerArn,
-      webAclArn: waf_alb.attrArn,
+      webAclArn: wafAlb.attrArn,
     });
 
     const cf = new cloudfront.Distribution(this, "cf", {
       defaultBehavior: {
         origin: new origins.LoadBalancerV2Origin(alb, {
           customHeaders: {
-            "X-Origin-Verify": cf_header.secretValue.toString(),
+            "X-Origin-Verify": cfHeader.secretValue.toString(),
           },
           protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
         }),
@@ -130,22 +130,18 @@ export class SecretsAnswerStack extends cdk.Stack {
     });
 
     // Lambda (Rotate the secret created above)
-    const secret_rotate_lambda = new lambda.Function(
-      this,
-      "secret_rotate_lambda",
-      {
-        runtime: lambda.Runtime.PYTHON_3_7,
-        code: lambda.Code.fromAsset("lambda/secrets-answer"),
-        handler: "rotate.lambda_handler",
-        timeout: cdk.Duration.seconds(300),
-      }
-    );
+    const secretRotateLambda = new lambda.Function(this, "secretRotateLambda", {
+      runtime: lambda.Runtime.PYTHON_3_7,
+      code: lambda.Code.fromAsset("lambda/secrets-answer"),
+      handler: "rotate.lambda_handler",
+      timeout: cdk.Duration.seconds(300),
+    });
 
-    secret_rotate_lambda.addPermission("allow_sm", {
+    secretRotateLambda.addPermission("allowSm", {
       principal: new iam.ServicePrincipal("secretsmanager.amazonaws.com"),
     });
 
-    secret_rotate_lambda.addToRolePolicy(
+    secretRotateLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: [
           "secretsmanager:GetRandomPassword",
@@ -156,7 +152,7 @@ export class SecretsAnswerStack extends cdk.Stack {
       })
     );
 
-    secret_rotate_lambda.addToRolePolicy(
+    secretRotateLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: [
           "cloudfront:GetDistributionConfig",
@@ -167,7 +163,7 @@ export class SecretsAnswerStack extends cdk.Stack {
       })
     );
 
-    secret_rotate_lambda.addToRolePolicy(
+    secretRotateLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ["wafv2:UpdateWebACL", "wafv2:GetWebACL"],
         resources: ["*"],
@@ -175,23 +171,23 @@ export class SecretsAnswerStack extends cdk.Stack {
       })
     );
 
-    cf_header.grantRead(secret_rotate_lambda);
-    cf_header.grantWrite(secret_rotate_lambda);
+    cfHeader.grantRead(secretRotateLambda);
+    cfHeader.grantWrite(secretRotateLambda);
 
-    cf_header.addRotationSchedule("secret_rotate_schedule", {
-      rotationLambda: secret_rotate_lambda,
+    cfHeader.addRotationSchedule("secretRotateSchedule", {
+      rotationLambda: secretRotateLambda,
       automaticallyAfter: cdk.Duration.days(30),
     });
 
-    secret_rotate_lambda.addEnvironment("WAF_ID", waf_alb.attrId);
-    secret_rotate_lambda.addEnvironment("WAF_NAME", waf_alb.name!);
-    secret_rotate_lambda.addEnvironment("DISTRIBUTION_ID", cf.distributionId);
+    secretRotateLambda.addEnvironment("WAF_ID", wafAlb.attrId);
+    secretRotateLambda.addEnvironment("WAF_NAME", wafAlb.name!);
+    secretRotateLambda.addEnvironment("DISTRIBUTION_ID", cf.distributionId);
 
-    new CfnOutput(this, "alb_dns_name", {
+    new CfnOutput(this, "albDnsName", {
       value: alb.loadBalancerDnsName,
     });
 
-    new CfnOutput(this, "cf_dns_name", {
+    new CfnOutput(this, "cfDnsName", {
       value: cf.distributionDomainName,
     });
   }

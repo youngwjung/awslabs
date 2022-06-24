@@ -19,10 +19,10 @@ export class CliStack extends cdk.Stack {
       ],
     });
 
-    const user_data = ec2.UserData.forLinux();
-    user_data.addCommands("echo helloword > /home/ec2-user/index.html");
+    const userData = ec2.UserData.forLinux();
+    userData.addCommands("echo helloword > /home/ec2-user/index.html");
 
-    const master_instance = new ec2.Instance(this, "master", {
+    const masterInstance = new ec2.Instance(this, "masterInstance", {
       vpc: vpc,
       instanceType: ec2.InstanceType.of(
         ec2.InstanceClass.T2,
@@ -31,11 +31,11 @@ export class CliStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      userData: user_data,
+      userData: userData,
       instanceName: "Master",
     });
 
-    const slave_instance = new ec2.Instance(this, "slave", {
+    const slaveInstance = new ec2.Instance(this, "slaveInstance", {
       vpc: vpc,
       instanceType: ec2.InstanceType.of(
         ec2.InstanceClass.T2,
@@ -47,15 +47,15 @@ export class CliStack extends cdk.Stack {
       instanceName: "Slave",
     });
 
-    master_instance.role.addManagedPolicy(
+    masterInstance.role.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName(
         "service-role/AmazonEC2RoleforSSM"
       )
     );
-    master_instance.role.addManagedPolicy(
+    masterInstance.role.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonS3FullAccess")
     );
-    master_instance.role.addManagedPolicy(
+    masterInstance.role.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonEC2FullAccess")
     );
 

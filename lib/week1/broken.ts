@@ -19,7 +19,7 @@ export class BrokenStack extends cdk.Stack {
       ],
     });
 
-    const role = new iam.Role(this, "Role", {
+    const role = new iam.Role(this, "role", {
       roleName: "week1-broken-role",
       assumedBy: new iam.ServicePrincipal("ec2.amazonaws.com"),
     });
@@ -32,8 +32,8 @@ export class BrokenStack extends cdk.Stack {
       iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonS3FullAccess")
     );
 
-    const user_data = ec2.UserData.forLinux();
-    user_data.addCommands(
+    const userData = ec2.UserData.forLinux();
+    userData.addCommands(
       "aws s3 cp s3://youngwjung/awslabs/week1-broken.sh /home/ec2-user/",
       "bash /home/ec2-user/week1-broken.sh",
       "rm /home/ec2-user/week1-broken.sh"
@@ -48,7 +48,7 @@ export class BrokenStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      userData: user_data,
+      userData: userData,
       role: role,
     });
 

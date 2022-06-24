@@ -21,22 +21,22 @@ export class KmsStack extends cdk.Stack {
       ],
     });
 
-    const encryption_key = new kms.Key(this, "encryption_key", {
+    const encryptionKey = new kms.Key(this, "encryptionKey", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       pendingWindow: cdk.Duration.days(7),
     });
 
-    const db_secret = new sm.Secret(this, "db_secret", {
+    const dbSecret = new sm.Secret(this, "dbSecret", {
       generateSecretString: {
         secretStringTemplate: JSON.stringify({ username: "admin" }),
         generateStringKey: "password",
         excludePunctuation: true,
         passwordLength: 20,
       },
-      encryptionKey: encryption_key,
+      encryptionKey: encryptionKey,
     });
 
-    const random_string = new sm.Secret(this, "random_string", {
+    const randomString = new sm.Secret(this, "randomString", {
       generateSecretString: {
         passwordLength: 10,
         excludePunctuation: true,
@@ -53,7 +53,7 @@ export class KmsStack extends cdk.Stack {
         ec2.InstanceSize.MICRO
       ),
       allocatedStorage: 20,
-      credentials: rds.Credentials.fromSecret(db_secret),
+      credentials: rds.Credentials.fromSecret(dbSecret),
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       vpcSubnets: {
         subnetType: ec2.SubnetType.PUBLIC,
@@ -62,24 +62,24 @@ export class KmsStack extends cdk.Stack {
 
     mysql.connections.allowDefaultPortFromAnyIpv4();
 
-    const temp_user_data = ec2.UserData.forLinux();
-    temp_user_data.addCommands("yum install -y mysql jq");
-    temp_user_data.addCommands(
-      `aws secretsmanager get-secret-value --secret-id ${db_secret.secretName} --region $(curl http://169.254.169.254/latest/meta-data/placement/region) | jq -r '.SecretString' > /tmp/db_credentials`
+    const tempUserData = ec2.UserData.forLinux();
+    tempUserData.addCommands("yum install -y mysql jq");
+    tempUserData.addCommands(
+      `aws secretsmanager get-secret-value --secret-id ${dbSecret.secretName} --region $(curl http://169.254.169.254/latest/meta-data/placement/region) | jq -r '.SecretString' > /tmp/db_credentials`
     );
-    temp_user_data.addCommands(
+    tempUserData.addCommands(
       "cat <<EOF >> /tmp/db.sql",
       "CREATE DATABASE secret;",
       "USE secret;",
       "CREATE TABLE IF NOT EXISTS secret (id INT AUTO_INCREMENT, value VARCHAR(255) NOT NULL, PRIMARY KEY (id));",
-      `INSERT INTO secret (value) VALUES ("$(aws kms encrypt --key-id ${encryption_key.keyId} --plaintext $(aws secretsmanager get-secret-value --secret-id ${random_string.secretName} --region $(curl http://169.254.169.254/latest/meta-data/placement/region) | jq -r '.SecretString') --region $(curl http://169.254.169.254/latest/meta-data/placement/region) --output text --query CiphertextBlob)");`,
+      `INSERT INTO secret (value) VALUES ("$(aws kms encrypt --key-id ${encryptionKey.keyId} --plaintext $(aws secretsmanager get-secret-value --secret-id ${randomString.secretName} --region $(curl http://169.254.169.254/latest/meta-data/placement/region) | jq -r '.SecretString') --region $(curl http://169.254.169.254/latest/meta-data/placement/region) --output text --query CiphertextBlob)");`,
       "EOF"
     );
-    temp_user_data.addCommands(
+    tempUserData.addCommands(
       "mysql -h $(cat /tmp/db_credentials | jq -r '.host') -u $(cat /tmp/db_credentials | jq -r '.username') -p$(cat /tmp/db_credentials | jq -r '.password') < /tmp/db.sql"
     );
 
-    const temp_instance = new ec2.Instance(this, "temp_instance", {
+    const tempInstance = new ec2.Instance(this, "tempInstance", {
       vpc: vpc,
       instanceType: ec2.InstanceType.of(
         ec2.InstanceClass.T3,
@@ -88,18 +88,18 @@ export class KmsStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      userData: temp_user_data,
+      userData: tempUserData,
       userDataCausesReplacement: true,
     });
 
-    temp_instance.node.addDependency(mysql);
+    tempInstance.node.addDependency(mysql);
 
-    temp_instance.role.addManagedPolicy(
+    tempInstance.role.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName("AdministratorAccess")
     );
 
-    const user_data = ec2.UserData.forLinux();
-    user_data.addCommands("yum install -y mysql jq");
+    const userData = ec2.UserData.forLinux();
+    userData.addCommands("yum install -y mysql jq");
 
     const instance = new ec2.Instance(this, "instance", {
       vpc: vpc,
@@ -110,7 +110,7 @@ export class KmsStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      userData: user_data,
+      userData: userData,
       userDataCausesReplacement: true,
     });
 
@@ -120,7 +120,7 @@ export class KmsStack extends cdk.Stack {
       )
     );
 
-    const iam_user = new iam.User(this, "iam_user", {
+    const iamUser = new iam.User(this, "iamUser", {
       password: new cdk.SecretValue("Asdf!23456"),
       managedPolicies: [
         iam.ManagedPolicy.fromAwsManagedPolicyName("ReadOnlyAccess"),
@@ -129,27 +129,27 @@ export class KmsStack extends cdk.Stack {
       ],
     });
 
-    new CfnOutput(this, "rds_credentials", {
-      value: db_secret.secretName,
+    new CfnOutput(this, "rdsCredentials", {
+      value: dbSecret.secretName,
     });
 
-    new CfnOutput(this, "rds_encryption_key", {
-      value: encryption_key.keyId,
+    new CfnOutput(this, "rdsEncryptionKey", {
+      value: encryptionKey.keyId,
     });
 
-    new CfnOutput(this, "db_record_value", {
-      value: random_string.secretName,
+    new CfnOutput(this, "dbRecordValue", {
+      value: randomString.secretName,
     });
 
-    new CfnOutput(this, "iam_user_name", {
-      value: iam_user.userName,
+    new CfnOutput(this, "iamUserName", {
+      value: iamUser.userName,
     });
 
-    new CfnOutput(this, "iam_user_password", {
+    new CfnOutput(this, "iamUserPassword", {
       value: "Asdf!23456",
     });
 
-    new CfnOutput(this, "sign_in_url", {
+    new CfnOutput(this, "signInUrl", {
       value: `https://${this.account}.signin.aws.amazon.com/console`,
     });
   }

@@ -7,7 +7,7 @@ export class EbsStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const keypair = new cdk.CfnParameter(this, "keypair", {
+    const keyPair = new cdk.CfnParameter(this, "keyPair", {
       type: "AWS::EC2::KeyPair::KeyName",
       description: "An Amazon EC2 key pair name.",
     });
@@ -22,7 +22,7 @@ export class EbsStack extends cdk.Stack {
       ],
     });
 
-    const role = new iam.Role(this, "Role", {
+    const role = new iam.Role(this, "role", {
       roleName: "week1-ebs-role",
       assumedBy: new iam.ServicePrincipal("ec2.amazonaws.com"),
     });
@@ -35,8 +35,8 @@ export class EbsStack extends cdk.Stack {
       iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonS3FullAccess")
     );
 
-    const user_data = ec2.UserData.forLinux();
-    user_data.addCommands(
+    const userData = ec2.UserData.forLinux();
+    userData.addCommands(
       "aws s3 cp s3://youngwjung/awslabs/week1-ebs.sh /home/ec2-user/",
       "bash /home/ec2-user/week1-ebs.sh"
     );
@@ -50,8 +50,8 @@ export class EbsStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      userData: user_data,
-      keyName: keypair.valueAsString,
+      userData: userData,
+      keyName: keyPair.valueAsString,
       role: role,
     });
   }

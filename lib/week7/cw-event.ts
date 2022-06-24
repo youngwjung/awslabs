@@ -32,21 +32,21 @@ export class CweventStack extends cdk.Stack {
       maxCapacity: 4,
     });
 
-    const slack_notification = new lambda.Function(this, "slack_notification", {
+    const slackNotification = new lambda.Function(this, "slackNotification", {
       runtime: lambda.Runtime.PYTHON_3_7,
       code: lambda.Code.fromAsset("lambda/slack-notification"),
       handler: "app.lambda_handler",
       timeout: cdk.Duration.seconds(300),
     });
 
-    slack_notification.addEnvironment("SLACK_CHANNEL", "");
-    slack_notification.addEnvironment("WEBHOOK_URL", "");
+    slackNotification.addEnvironment("SLACK_CHANNEL", "");
+    slackNotification.addEnvironment("WEBHOOK_URL", "");
 
-    new CfnOutput(this, "LambdaFunctionName", {
-      value: slack_notification.functionName,
+    new CfnOutput(this, "lambdaFunctionName", {
+      value: slackNotification.functionName,
     });
 
-    new CfnOutput(this, "AutoScalingGroupName", {
+    new CfnOutput(this, "autoScalingGroupName", {
       value: asg.autoScalingGroupName,
     });
   }

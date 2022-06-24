@@ -11,12 +11,12 @@ export class ColorStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const domain_name = new cdk.CfnParameter(this, "domainName", {
+    const domainName = new cdk.CfnParameter(this, "domainName", {
       type: "String",
       description: "Hosted zone domain name.",
     });
 
-    const hosted_zone_id = new cdk.CfnParameter(this, "hostedZoneId", {
+    const hostedZoneId = new cdk.CfnParameter(this, "hostedZoneId", {
       type: "String",
       description: "Hosted zone ID.",
     });
@@ -31,22 +31,22 @@ export class ColorStack extends cdk.Stack {
       ],
     });
 
-    const green_user_data = ec2.UserData.forLinux();
-    green_user_data.addCommands("yum update -y && yum install -y httpd");
-    green_user_data.addCommands(
+    const greenUserData = ec2.UserData.forLinux();
+    greenUserData.addCommands("yum update -y && yum install -y httpd");
+    greenUserData.addCommands(
       "echo '<style>body {background-color: green}</style>' > /tmp/index.html"
     );
-    green_user_data.addCommands(
+    greenUserData.addCommands(
       "echo '<h1>Hi! I am green</h1>' >> /tmp/index.html"
     );
-    green_user_data.addCommands("cp /tmp/index.html /var/www/html/");
-    green_user_data.addCommands(
+    greenUserData.addCommands("cp /tmp/index.html /var/www/html/");
+    greenUserData.addCommands(
       "mkdir /var/www/html/green && mv /tmp/index.html /var/www/html/green/"
     );
-    green_user_data.addCommands("systemctl enable httpd");
-    green_user_data.addCommands("systemctl start httpd");
+    greenUserData.addCommands("systemctl enable httpd");
+    greenUserData.addCommands("systemctl start httpd");
 
-    const green_instance = new ec2.Instance(this, "green_instance", {
+    const greenInstance = new ec2.Instance(this, "greenInstance", {
       vpc: vpc,
       instanceType: ec2.InstanceType.of(
         ec2.InstanceClass.T2,
@@ -55,25 +55,25 @@ export class ColorStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      userData: green_user_data,
+      userData: greenUserData,
     });
 
-    const blue_user_data = ec2.UserData.forLinux();
-    blue_user_data.addCommands("yum update -y && yum install -y httpd");
-    blue_user_data.addCommands(
+    const blueUserData = ec2.UserData.forLinux();
+    blueUserData.addCommands("yum update -y && yum install -y httpd");
+    blueUserData.addCommands(
       "echo '<style>body {background-color: blue}</style>' > /tmp/index.html"
     );
-    blue_user_data.addCommands(
+    blueUserData.addCommands(
       "echo '<h1>Hi! I am blue</h1>' >> /tmp/index.html"
     );
-    blue_user_data.addCommands("cp /tmp/index.html /var/www/html/");
-    blue_user_data.addCommands(
+    blueUserData.addCommands("cp /tmp/index.html /var/www/html/");
+    blueUserData.addCommands(
       "mkdir /var/www/html/blue && mv /tmp/index.html /var/www/html/blue/"
     );
-    blue_user_data.addCommands("systemctl enable httpd");
-    blue_user_data.addCommands("systemctl start httpd");
+    blueUserData.addCommands("systemctl enable httpd");
+    blueUserData.addCommands("systemctl start httpd");
 
-    const blue_instance = new ec2.Instance(this, "blue_instance", {
+    const blueInstance = new ec2.Instance(this, "blueInstance", {
       vpc: vpc,
       instanceType: ec2.InstanceType.of(
         ec2.InstanceClass.T2,
@@ -82,7 +82,7 @@ export class ColorStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      userData: blue_user_data,
+      userData: blueUserData,
     });
 
     const lb = new elbv2.ApplicationLoadBalancer(this, "lb", {
@@ -90,40 +90,40 @@ export class ColorStack extends cdk.Stack {
       internetFacing: true,
     });
 
-    const http_listener = lb.addListener("http_listener", {
+    const httpListener = lb.addListener("httpListener", {
       port: 80,
       open: true,
     });
 
-    http_listener.addTargets("web_target", {
+    httpListener.addTargets("webTarget", {
       port: 80,
       targets: [
-        new InstanceTarget(green_instance),
-        new InstanceTarget(blue_instance),
+        new InstanceTarget(greenInstance),
+        new InstanceTarget(blueInstance),
       ],
       deregistrationDelay: cdk.Duration.seconds(0),
     });
 
-    green_instance.connections.allowFrom(lb, ec2.Port.tcp(80));
-    blue_instance.connections.allowFrom(lb, ec2.Port.tcp(80));
+    greenInstance.connections.allowFrom(lb, ec2.Port.tcp(80));
+    blueInstance.connections.allowFrom(lb, ec2.Port.tcp(80));
 
-    const hosted_zone = route53.HostedZone.fromHostedZoneAttributes(
+    const hostedZone = route53.HostedZone.fromHostedZoneAttributes(
       this,
-      "hosted_zone",
+      "hostedZone",
       {
-        hostedZoneId: hosted_zone_id.valueAsString,
-        zoneName: domain_name.valueAsString,
+        hostedZoneId: hostedZoneId.valueAsString,
+        zoneName: domainName.valueAsString,
       }
     );
 
-    const site_url = new route53.ARecord(this, "site_url", {
-      zone: hosted_zone,
+    const domainRecord = new route53.ARecord(this, "domainRecord", {
+      zone: hostedZone,
       target: route53.RecordTarget.fromAlias(new LoadBalancerTarget(lb)),
       recordName: "color",
     });
 
-    new CfnOutput(this, "output_site_url", {
-      value: site_url.domainName,
+    new CfnOutput(this, "siteUrl", {
+      value: domainRecord.domainName,
     });
   }
 }

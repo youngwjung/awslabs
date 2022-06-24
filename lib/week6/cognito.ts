@@ -20,8 +20,8 @@ export class CognitoStack extends cdk.Stack {
       ],
     });
 
-    const user_data = ec2.UserData.forLinux();
-    user_data.addCommands("echo cognito > /home/ec2-user/sample.txt");
+    const userData = ec2.UserData.forLinux();
+    userData.addCommands("echo cognito > /home/ec2-user/sample.txt");
 
     const instance = new ec2.Instance(this, "instance", {
       vpc: vpc,
@@ -32,7 +32,7 @@ export class CognitoStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      userData: user_data,
+      userData: userData,
     });
 
     instance.role.addManagedPolicy(
@@ -41,26 +41,26 @@ export class CognitoStack extends cdk.Stack {
       )
     );
 
-    const user_pool = new cognito.UserPool(this, "user_pool");
+    const userPool = new cognito.UserPool(this, "userPool");
 
-    const app_client = user_pool.addClient("app_client");
+    const appClient = userPool.addClient("appClient");
 
-    const identity_pool = new cognito.CfnIdentityPool(this, "identity_pool", {
+    const identityPool = new cognito.CfnIdentityPool(this, "identityPool", {
       allowUnauthenticatedIdentities: true,
       cognitoIdentityProviders: [
         {
-          providerName: user_pool.userPoolProviderName,
-          clientId: app_client.userPoolClientId,
+          providerName: userPool.userPoolProviderName,
+          clientId: appClient.userPoolClientId,
         },
       ],
     });
 
-    const unauthenticated_role = new iam.Role(this, "unauthenticated_role", {
+    const unauthenticatedRole = new iam.Role(this, "unauthenticatedRole", {
       assumedBy: new iam.FederatedPrincipal(
         "cognito-identity.amazonaws.com",
         {
           StringEquals: {
-            "cognito-identity.amazonaws.com:aud": identity_pool.ref,
+            "cognito-identity.amazonaws.com:aud": identityPool.ref,
           },
           "ForAnyValue:StringLike": {
             "cognito-identity.amazonaws.com:amr": "unauthenticated",
@@ -70,12 +70,12 @@ export class CognitoStack extends cdk.Stack {
       ),
     });
 
-    const authenticated_role = new iam.Role(this, "authenticated_role", {
+    const authenticatedRole = new iam.Role(this, "authenticatedRole", {
       assumedBy: new iam.FederatedPrincipal(
         "cognito-identity.amazonaws.com",
         {
           StringEquals: {
-            "cognito-identity.amazonaws.com:aud": identity_pool.ref,
+            "cognito-identity.amazonaws.com:aud": identityPool.ref,
           },
           "ForAnyValue:StringLike": {
             "cognito-identity.amazonaws.com:amr": "authenticated",
@@ -85,15 +85,15 @@ export class CognitoStack extends cdk.Stack {
       ),
     });
 
-    const identity_pool_role_attachment =
+    const identityPoolRoleAttachment =
       new cognito.CfnIdentityPoolRoleAttachment(
         this,
-        "identity_pool_role_attachment",
+        "identityPoolRoleAttachment",
         {
-          identityPoolId: identity_pool.ref,
+          identityPoolId: identityPool.ref,
           roles: {
-            unauthenticated: unauthenticated_role.roleArn,
-            authenticated: authenticated_role.roleArn,
+            unauthenticated: unauthenticatedRole.roleArn,
+            authenticated: authenticatedRole.roleArn,
           },
         }
       );
@@ -102,16 +102,16 @@ export class CognitoStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    new CfnOutput(this, "bucket_name", {
+    new CfnOutput(this, "bucketName", {
       value: bucket.bucketName,
     });
 
-    new CfnOutput(this, "app_client_id", {
-      value: app_client.userPoolClientId,
+    new CfnOutput(this, "appClientId", {
+      value: appClient.userPoolClientId,
     });
 
-    new CfnOutput(this, "identity_pool_id", {
-      value: identity_pool.ref,
+    new CfnOutput(this, "identityPoolId", {
+      value: identityPool.ref,
     });
   }
 }

@@ -17,20 +17,20 @@ export class CwmetricStack extends cdk.Stack {
       ],
     });
 
-    const user_data = ec2.UserData.forLinux();
-    user_data.addCommands(
+    const userData = ec2.UserData.forLinux();
+    userData.addCommands(
       "fallocate -l $(($(df / | tail -1 | tr -s ' ' | cut -d' ' -f4) * 999)) /tmp/file"
     );
-    user_data.addCommands(
+    userData.addCommands(
       `python -c "x = [str(i**2) for i in range(5000000)];print(x)" >> /tmp/result.log`
     );
-    user_data.addCommands(
+    userData.addCommands(
       `python -c "x = [str(i**2) for i in range(5000000)];print(x)" >> /tmp/result.log`
     );
-    user_data.addCommands(
+    userData.addCommands(
       `python -c "x = [str(i**2) for i in range(5000000)];print(x)" >> /tmp/result.log`
     );
-    user_data.addCommands(
+    userData.addCommands(
       `python -c "x = [str(i**2) for i in range(5000000)];print(x)" >> /tmp/result.log`
     );
 
@@ -43,7 +43,7 @@ export class CwmetricStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      userData: user_data,
+      userData: userData,
       userDataCausesReplacement: true,
     });
 

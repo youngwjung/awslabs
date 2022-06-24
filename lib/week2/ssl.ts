@@ -8,17 +8,17 @@ export class SslStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const keypair = new cdk.CfnParameter(this, "keypair", {
+    const keyPair = new cdk.CfnParameter(this, "keypair", {
       type: "AWS::EC2::KeyPair::KeyName",
       description: "An Amazon EC2 key pair name.",
     });
 
-    const domain_name = new cdk.CfnParameter(this, "domainName", {
+    const domainName = new cdk.CfnParameter(this, "domainName", {
       type: "String",
       description: "Hosted zone domain name.",
     });
 
-    const hosted_zone_id = new cdk.CfnParameter(this, "hostedZoneId", {
+    const hostedZoneId = new cdk.CfnParameter(this, "hostedZoneId", {
       type: "String",
       description: "Hosted zone ID.",
     });
@@ -33,17 +33,17 @@ export class SslStack extends cdk.Stack {
       ],
     });
 
-    const user_data = ec2.UserData.forLinux();
-    user_data.addCommands(
+    const userData = ec2.UserData.forLinux();
+    userData.addCommands(
       "yum update -y && yum install -y httpd git mod_wsgi python3-3.7*"
     );
-    user_data.addCommands("pip3 install Flask==1.1.4");
-    user_data.addCommands(
+    userData.addCommands("pip3 install Flask==1.1.4");
+    userData.addCommands(
       "git clone https://github.com/youngwjung/flask-ssl.git /var/www/html/"
     );
-    user_data.addCommands("mv /var/www/html/app.conf /etc/httpd/conf.d/");
-    user_data.addCommands("systemctl enable httpd");
-    user_data.addCommands("systemctl start httpd");
+    userData.addCommands("mv /var/www/html/app.conf /etc/httpd/conf.d/");
+    userData.addCommands("systemctl enable httpd");
+    userData.addCommands("systemctl start httpd");
 
     const instance = new ec2.Instance(this, "instance", {
       vpc: vpc,
@@ -54,28 +54,28 @@ export class SslStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      userData: user_data,
-      keyName: keypair.valueAsString,
+      userData: userData,
+      keyName: keyPair.valueAsString,
     });
     instance.connections.allowFromAnyIpv4(ec2.Port.tcp(80));
 
-    const hosted_zone = route53.HostedZone.fromHostedZoneAttributes(
+    const hostedZone = route53.HostedZone.fromHostedZoneAttributes(
       this,
-      "hosted_zone",
+      "hostedZone",
       {
-        hostedZoneId: hosted_zone_id.valueAsString,
-        zoneName: domain_name.valueAsString,
+        hostedZoneId: hostedZoneId.valueAsString,
+        zoneName: domainName.valueAsString,
       }
     );
 
-    const site_url = new route53.ARecord(this, "site_url", {
-      zone: hosted_zone,
+    const domainRecord = new route53.ARecord(this, "domainRecord", {
+      zone: hostedZone,
       target: route53.RecordTarget.fromIpAddresses(instance.instancePublicIp),
       recordName: "ssl",
     });
 
-    new CfnOutput(this, "output_site_url", {
-      value: site_url.domainName,
+    new CfnOutput(this, "siteUrl", {
+      value: domainRecord.domainName,
     });
   }
 }

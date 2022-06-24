@@ -10,7 +10,7 @@ export class VpcStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const keypair = new cdk.CfnParameter(this, "keypair", {
+    const keyPair = new cdk.CfnParameter(this, "keyPair", {
       type: "AWS::EC2::KeyPair::KeyName",
       description: "An Amazon EC2 key pair name.",
     });
@@ -23,40 +23,40 @@ export class VpcStack extends cdk.Stack {
     });
 
     // Public subnets with IGW
-    const public_subnet_1 = new ec2.Subnet(this, "public_subnet_1", {
+    const publicSubnet1 = new ec2.Subnet(this, "publicSubnet1", {
       availabilityZone: vpc.availabilityZones[0],
       cidrBlock: "10.0.0.0/24",
       vpcId: vpc.vpcId,
       mapPublicIpOnLaunch: true,
     });
 
-    const public_subnet_2 = new ec2.Subnet(this, "public_subnet_2", {
+    const publicSubnet2 = new ec2.Subnet(this, "publicSubnet2", {
       availabilityZone: vpc.availabilityZones[1],
       cidrBlock: "10.0.1.0/24",
       vpcId: vpc.vpcId,
     });
 
     // Private subnets with NAT
-    const private_subnet_1 = new ec2.Subnet(this, "private_subnet_1", {
+    const privateSubnet1 = new ec2.Subnet(this, "privateSubnet1", {
       availabilityZone: vpc.availabilityZones[0],
       cidrBlock: "10.0.10.0/24",
       vpcId: vpc.vpcId,
     });
 
-    const private_subnet_2 = new ec2.Subnet(this, "private_subnet_2", {
+    const privateSubnet2 = new ec2.Subnet(this, "privateSubnet2", {
       availabilityZone: vpc.availabilityZones[1],
       cidrBlock: "10.0.11.0/24",
       vpcId: vpc.vpcId,
     });
 
     // Isolated subnets
-    const isolated_subnet_1 = new ec2.Subnet(this, "isolated_subnet_1", {
+    const isolatedSubnet1 = new ec2.Subnet(this, "isolatedSubnet1", {
       availabilityZone: vpc.availabilityZones[0],
       cidrBlock: "10.0.20.0/24",
       vpcId: vpc.vpcId,
     });
 
-    const isolated_subnet_2 = new ec2.Subnet(this, "isolated_subnet_2", {
+    const isolatedSubnet2 = new ec2.Subnet(this, "isolatedSubnet2", {
       availabilityZone: vpc.availabilityZones[1],
       cidrBlock: "10.0.21.0/24",
       vpcId: vpc.vpcId,
@@ -66,83 +66,66 @@ export class VpcStack extends cdk.Stack {
 
     const igw = new ec2.CfnInternetGateway(this, "igw");
 
-    const igw_attachment = new ec2.CfnVPCGatewayAttachment(
+    const igwAttachment = new ec2.CfnVPCGatewayAttachment(
       this,
-      "igw_attachment",
+      "igwAttachment",
       {
         vpcId: vpc.vpcId,
         internetGatewayId: igw.ref,
       }
     );
 
-    const eip_nat = new ec2.CfnEIP(this, "eip_nat");
+    const eipNat = new ec2.CfnEIP(this, "eipNat");
 
     const nat = new ec2.CfnNatGateway(this, "nat", {
-      allocationId: eip_nat.attrAllocationId,
-      subnetId: public_subnet_1.subnetId,
+      allocationId: eipNat.attrAllocationId,
+      subnetId: publicSubnet1.subnetId,
     });
 
-    // // Route Tables
-    // const rtb_public = new ec2.CfnRouteTable(this, "rtb_public", {
-    //   vpcId: vpc.vpcId,
-    // });
-
-    // const rtb_private = new ec2.CfnRouteTable(this, "rtb_private", {
-    //   vpcId: vpc.vpcId,
-    // });
-
-    // const rtb_isolated = new ec2.CfnRouteTable(this, "rtb_isolated", {
-    //   vpcId: vpc.vpcId,
-    // });
-
     // Routes
-    const route_igw = new ec2.CfnRoute(this, "route_igw", {
-      routeTableId: public_subnet_1.routeTable.routeTableId,
+    const routeIgw = new ec2.CfnRoute(this, "routeIgw", {
+      routeTableId: publicSubnet1.routeTable.routeTableId,
       destinationCidrBlock: "10.1.0.0/16",
       gatewayId: igw.ref,
     });
 
-    const route_nat = new ec2.CfnRoute(this, "route_nat", {
-      routeTableId: private_subnet_1.routeTable.routeTableId,
+    const routeNat = new ec2.CfnRoute(this, "routeNat", {
+      routeTableId: privateSubnet1.routeTable.routeTableId,
       destinationCidrBlock: "10.1.0.0/16",
       natGatewayId: nat.ref,
     });
 
     // NACL
-    const nacl_public = new ec2.NetworkAcl(this, "nacl_public", {
+    const naclPublic = new ec2.NetworkAcl(this, "naclPublic", {
       vpc: vpc,
     });
 
-    const nacl_private = new ec2.NetworkAcl(this, "nacl_private", {
+    const naclPrivate = new ec2.NetworkAcl(this, "naclPrivate", {
       vpc: vpc,
     });
 
-    const nacl_isolated = new ec2.NetworkAcl(this, "nacl_isolated", {
+    const naclIsolated = new ec2.NetworkAcl(this, "naclIsolated", {
       vpc: vpc,
     });
 
-    const nacl_entry_public = new ec2.NetworkAclEntry(
+    const naclEntryPublic = new ec2.NetworkAclEntry(this, "naclEntryPublic", {
+      cidr: ec2.AclCidr.ipv4("172.16.0.0/24"),
+      networkAcl: naclPublic,
+      ruleNumber: 100,
+      traffic: ec2.AclTraffic.icmp({
+        code: -1,
+        type: -1,
+      }),
+      ruleAction: ec2.Action.ALLOW,
+      direction: ec2.TrafficDirection.EGRESS,
+    });
+
+    const naclEntryPrivate1 = new ec2.NetworkAclEntry(
       this,
-      "nacl_entry_public",
-      {
-        cidr: ec2.AclCidr.ipv4("172.16.0.0/24"),
-        networkAcl: nacl_public,
-        ruleNumber: 100,
-        traffic: ec2.AclTraffic.icmp({
-          code: -1,
-          type: -1,
-        }),
-        ruleAction: ec2.Action.ALLOW,
-        direction: ec2.TrafficDirection.EGRESS,
-      }
-    );
-
-    const nacl_entry_private_1 = new ec2.NetworkAclEntry(
-      this,
-      "nacl_entry_private",
+      "naclEntryPrivate1",
       {
         cidr: ec2.AclCidr.anyIpv4(),
-        networkAcl: nacl_private,
+        networkAcl: naclPrivate,
         ruleNumber: 100,
         traffic: ec2.AclTraffic.icmp({
           code: -1,
@@ -153,12 +136,12 @@ export class VpcStack extends cdk.Stack {
       }
     );
 
-    const nacl_entry_private_2 = new ec2.NetworkAclEntry(
+    const naclEntryPrivate2 = new ec2.NetworkAclEntry(
       this,
-      "nacl_entry_private_2",
+      "naclEntryPrivate2",
       {
         cidr: ec2.AclCidr.anyIpv4(),
-        networkAcl: nacl_private,
+        networkAcl: naclPrivate,
         ruleNumber: 200,
         traffic: ec2.AclTraffic.icmp({
           code: -1,
@@ -169,27 +152,27 @@ export class VpcStack extends cdk.Stack {
       }
     );
 
-    public_subnet_1.associateNetworkAcl(
-      "public_subnet_1_nacl_association",
-      nacl_public
+    publicSubnet1.associateNetworkAcl(
+      "publicSubnet1NaclAssociation",
+      naclPublic
     );
 
-    private_subnet_1.associateNetworkAcl(
-      "private_subnet_1_nacl_association",
-      nacl_private
+    privateSubnet1.associateNetworkAcl(
+      "privateSubnet1NaclAssociation",
+      naclPrivate
     );
 
-    const bastion_host_sg = new ec2.SecurityGroup(this, "bastion_host_sg", {
+    const bastionHostSg = new ec2.SecurityGroup(this, "bastionHostSg", {
       vpc: vpc,
       allowAllOutbound: false,
     });
 
-    bastion_host_sg.addIngressRule(
+    bastionHostSg.addIngressRule(
       ec2.Peer.ipv4("192.168.1.1/32"),
       ec2.Port.tcp(22)
     );
 
-    const bastion_host = new ec2.Instance(this, "bastion_host", {
+    const bastionHost = new ec2.Instance(this, "bastionHost", {
       vpc: vpc,
       instanceType: ec2.InstanceType.of(
         ec2.InstanceClass.T2,
@@ -198,23 +181,23 @@ export class VpcStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      keyName: keypair.valueAsString,
+      keyName: keyPair.valueAsString,
       vpcSubnets: {
-        subnets: [public_subnet_1],
+        subnets: [publicSubnet1],
       },
-      securityGroup: bastion_host_sg,
+      securityGroup: bastionHostSg,
     });
 
-    const user_data = ec2.UserData.forLinux();
-    user_data.addCommands("yum update -y && yum install -y httpd");
-    user_data.addCommands(
+    const userData = ec2.UserData.forLinux();
+    userData.addCommands("yum update -y && yum install -y httpd");
+    userData.addCommands(
       "curl http://169.254.169.254/latest/meta-data/public-ipv4 > /tmp/ip.txt"
     );
-    user_data.addCommands("cp /tmp/ip.txt /var/www/html/index.html");
-    user_data.addCommands("systemctl enable httpd");
-    user_data.addCommands("systemctl start httpd");
+    userData.addCommands("cp /tmp/ip.txt /var/www/html/index.html");
+    userData.addCommands("systemctl enable httpd");
+    userData.addCommands("systemctl start httpd");
 
-    const web_server = new ec2.Instance(this, "web_server", {
+    const webServer = new ec2.Instance(this, "webServer", {
       vpc: vpc,
       instanceType: ec2.InstanceType.of(
         ec2.InstanceClass.T2,
@@ -223,37 +206,37 @@ export class VpcStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      userData: user_data,
-      keyName: keypair.valueAsString,
+      userData: userData,
+      keyName: keyPair.valueAsString,
       vpcSubnets: {
-        subnets: [private_subnet_1],
+        subnets: [privateSubnet1],
       },
     });
 
-    web_server.connections.allowFrom(bastion_host_sg, ec2.Port.tcp(22));
+    webServer.connections.allowFrom(bastionHostSg, ec2.Port.tcp(22));
 
     const lb = new elbv2.ApplicationLoadBalancer(this, "lb", {
       vpc: vpc,
       internetFacing: true,
       vpcSubnets: {
-        subnets: [public_subnet_1, public_subnet_2],
+        subnets: [publicSubnet1, publicSubnet2],
       },
     });
 
-    const http_listener = lb.addListener("http_listener", {
+    const httpListener = lb.addListener("httpListener", {
       port: 80,
       open: true,
     });
 
-    http_listener.addTargets("web_target", {
+    httpListener.addTargets("webTarget", {
       port: 80,
-      targets: [new targets.InstanceTarget(web_server)],
+      targets: [new targets.InstanceTarget(webServer)],
       deregistrationDelay: cdk.Duration.seconds(60),
     });
 
-    web_server.connections.allowFrom(lb, ec2.Port.tcp(8080));
+    webServer.connections.allowFrom(lb, ec2.Port.tcp(8080));
 
-    new CfnOutput(this, "output_site_url", {
+    new CfnOutput(this, "siteUrl", {
       value: lb.loadBalancerDnsName,
     });
   }

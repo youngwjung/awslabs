@@ -20,16 +20,16 @@ export class EfsStack extends cdk.Stack {
       ],
     });
 
-    const user_data = ec2.UserData.forLinux();
-    user_data.addCommands("yum update -y && yum install -y httpd");
-    user_data.addCommands(
+    const userData = ec2.UserData.forLinux();
+    userData.addCommands("yum update -y && yum install -y httpd");
+    userData.addCommands(
       `echo "<h1>Hi from $(aws ec2 describe-instances --instance-ids $(curl http://169.254.169.254/latest/meta-data/instance-id) --region $(curl http://169.254.169.254/latest/meta-data/placement/region) --query "Reservations[*].Instances[*].Tags[?Key=='Name'].Value" --out text)</h1>" > /tmp/index.html`
     );
-    user_data.addCommands("cp /tmp/index.html /var/www/html/");
-    user_data.addCommands("systemctl enable httpd");
-    user_data.addCommands("systemctl start httpd");
+    userData.addCommands("cp /tmp/index.html /var/www/html/");
+    userData.addCommands("systemctl enable httpd");
+    userData.addCommands("systemctl start httpd");
 
-    const instance_a = new ec2.Instance(this, "instance_a", {
+    const instanceA = new ec2.Instance(this, "instanceA", {
       vpc: vpc,
       instanceType: ec2.InstanceType.of(
         ec2.InstanceClass.T2,
@@ -39,20 +39,20 @@ export class EfsStack extends cdk.Stack {
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
       instanceName: "A",
-      userData: user_data,
+      userData: userData,
     });
 
-    instance_a.role.addManagedPolicy(
+    instanceA.role.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName(
         "service-role/AmazonEC2RoleforSSM"
       )
     );
 
-    instance_a.role.addManagedPolicy(
+    instanceA.role.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonEC2ReadOnlyAccess")
     );
 
-    const instance_b = new ec2.Instance(this, "instance_b", {
+    const instanceB = new ec2.Instance(this, "instanceB", {
       vpc: vpc,
       instanceType: ec2.InstanceType.of(
         ec2.InstanceClass.T2,
@@ -62,16 +62,16 @@ export class EfsStack extends cdk.Stack {
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
       instanceName: "B",
-      userData: user_data,
+      userData: userData,
     });
 
-    instance_b.role.addManagedPolicy(
+    instanceB.role.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName(
         "service-role/AmazonEC2RoleforSSM"
       )
     );
 
-    instance_b.role.addManagedPolicy(
+    instanceB.role.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonEC2ReadOnlyAccess")
     );
 
@@ -80,21 +80,21 @@ export class EfsStack extends cdk.Stack {
       internetFacing: true,
     });
 
-    const http_listener = lb.addListener("http_listener", {
+    const httpListener = lb.addListener("httpListener", {
       port: 80,
       open: true,
     });
 
-    http_listener.addTargets("web_target", {
+    httpListener.addTargets("webTarget", {
       port: 80,
-      targets: [new InstanceTarget(instance_a), new InstanceTarget(instance_b)],
+      targets: [new InstanceTarget(instanceA), new InstanceTarget(instanceB)],
       deregistrationDelay: cdk.Duration.seconds(0),
     });
 
-    instance_a.connections.allowFrom(lb, ec2.Port.tcp(80));
-    instance_b.connections.allowFrom(lb, ec2.Port.tcp(80));
+    instanceA.connections.allowFrom(lb, ec2.Port.tcp(80));
+    instanceB.connections.allowFrom(lb, ec2.Port.tcp(80));
 
-    new CfnOutput(this, "output_site_url", {
+    new CfnOutput(this, "siteUrl", {
       value: lb.loadBalancerDnsName,
     });
   }

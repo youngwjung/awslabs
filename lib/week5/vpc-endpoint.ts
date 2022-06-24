@@ -19,11 +19,11 @@ export class VPCEndpointStack extends cdk.Stack {
       ],
     });
 
-    const ssm_vpc_endpoint = vpc.addInterfaceEndpoint("ssm_vpc_endpoint", {
+    const ssmVpcEndpoint = vpc.addInterfaceEndpoint("ssmVpcEndpoint", {
       service: ec2.InterfaceVpcEndpointAwsService.SSM,
     });
 
-    vpc.addInterfaceEndpoint("ssmmessages_vpc_endpoint", {
+    vpc.addInterfaceEndpoint("ssmmessagesVpcEndpoint", {
       service: ec2.InterfaceVpcEndpointAwsService.SSM_MESSAGES,
     });
 
@@ -39,15 +39,15 @@ export class VPCEndpointStack extends cdk.Stack {
         resources: [bucket.bucketArn, `${bucket.bucketArn}/*`],
         conditions: {
           StringNotEquals: {
-            "aws:SourceVpce": ssm_vpc_endpoint.vpcEndpointId,
+            "aws:SourceVpce": ssmVpcEndpoint.vpcEndpointId,
           },
         },
       })
     );
 
-    const user_data = ec2.UserData.forLinux();
-    user_data.addCommands("echo gateway > /home/ec2-user/gateway.txt");
-    user_data.addCommands("echo interface > /home/ec2-user/interface.txt");
+    const userData = ec2.UserData.forLinux();
+    userData.addCommands("echo gateway > /home/ec2-user/gateway.txt");
+    userData.addCommands("echo interface > /home/ec2-user/interface.txt");
 
     const instance = new ec2.Instance(this, "instance", {
       vpc: vpc,
@@ -58,7 +58,7 @@ export class VPCEndpointStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      userData: user_data,
+      userData: userData,
       vpcSubnets: {
         subnetType: ec2.SubnetType.ISOLATED,
       },
@@ -70,7 +70,7 @@ export class VPCEndpointStack extends cdk.Stack {
       )
     );
 
-    const output = new CfnOutput(this, "BucketName", {
+    const bucketName = new CfnOutput(this, "bucketName", {
       value: bucket.bucketName,
     });
   }

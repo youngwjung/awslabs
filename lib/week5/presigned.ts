@@ -10,12 +10,12 @@ export class PresignedStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const domain_name = new cdk.CfnParameter(this, "domainName", {
+    const domainName = new cdk.CfnParameter(this, "domainName", {
       type: "String",
       description: "Hosted zone domain name.",
     });
 
-    const hosted_zone_id = new cdk.CfnParameter(this, "hostedZoneId", {
+    const hostedZoneId = new cdk.CfnParameter(this, "hostedZoneId", {
       type: "String",
       description: "Hosted zone ID.",
     });
@@ -33,6 +33,7 @@ export class PresignedStack extends cdk.Stack {
     const bucket = new Bucket(this, "bucket", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
+
     bucket.addToResourcePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.DENY,
@@ -47,26 +48,26 @@ export class PresignedStack extends cdk.Stack {
       })
     );
 
-    const user_data = ec2.UserData.forLinux();
-    user_data.addCommands("amazon-linux-extras install -y nginx1");
-    user_data.addCommands("yum install -y git python3-3.7*");
-    user_data.addCommands(
+    const userData = ec2.UserData.forLinux();
+    userData.addCommands("amazon-linux-extras install -y nginx1");
+    userData.addCommands("yum install -y git python3-3.7*");
+    userData.addCommands(
       "cd /home/ec2-user/ && git clone https://github.com/youngwjung/s3-presigned-url.git"
     );
-    user_data.addCommands(
+    userData.addCommands(
       "pip3 install -r /home/ec2-user/s3-presigned-url/requirements.txt"
     );
-    user_data.addCommands(
+    userData.addCommands(
       `sed -i 's/BUCKET_NAME/"${bucket.bucketName}"/g' /home/ec2-user/s3-presigned-url/main.py`
     );
-    user_data.addCommands(
-      `sed -i 's/BACKEND/presigned.${domain_name.valueAsString}/g' /home/ec2-user/s3-presigned-url/html/main.js`
+    userData.addCommands(
+      `sed -i 's/BACKEND/presigned.${domainName.valueAsString}/g' /home/ec2-user/s3-presigned-url/html/main.js`
     );
-    user_data.addCommands(
+    userData.addCommands(
       "\\cp -r /home/ec2-user/s3-presigned-url/html/ /usr/share/nginx/"
     );
-    user_data.addCommands("systemctl enable nginx");
-    user_data.addCommands("systemctl start nginx");
+    userData.addCommands("systemctl enable nginx");
+    userData.addCommands("systemctl start nginx");
 
     const app = new ec2.Instance(this, "app", {
       vpc: vpc,
@@ -77,7 +78,7 @@ export class PresignedStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      userData: user_data,
+      userData: userData,
     });
 
     app.connections.allowFromAnyIpv4(ec2.Port.tcp(80));
@@ -93,24 +94,24 @@ export class PresignedStack extends cdk.Stack {
       instanceId: app.instanceId,
     });
 
-    const hosted_zone = route53.HostedZone.fromHostedZoneAttributes(
+    const hostedZone = route53.HostedZone.fromHostedZoneAttributes(
       this,
-      "hosted_zone",
+      "hostedZone",
       {
-        hostedZoneId: hosted_zone_id.valueAsString,
-        zoneName: domain_name.valueAsString,
+        hostedZoneId: hostedZoneId.valueAsString,
+        zoneName: domainName.valueAsString,
       }
     );
 
-    const site_url = new route53.ARecord(this, "site_url", {
-      zone: hosted_zone,
+    const domainRecord = new route53.ARecord(this, "domainRecord", {
+      zone: hostedZone,
       target: route53.RecordTarget.fromIpAddresses(eip.ref),
       recordName: "presigned",
       ttl: cdk.Duration.seconds(60),
     });
 
-    new CfnOutput(this, "output_site_url", {
-      value: site_url.domainName,
+    new CfnOutput(this, "siteUrl", {
+      value: domainRecord.domainName,
     });
   }
 }

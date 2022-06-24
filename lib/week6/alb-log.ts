@@ -21,13 +21,13 @@ export class AlblogStack extends cdk.Stack {
       ],
     });
 
-    const user_data = ec2.UserData.forLinux();
-    user_data.addCommands("yum update -y && yum install -y httpd git");
-    user_data.addCommands(
+    const userData = ec2.UserData.forLinux();
+    userData.addCommands("yum update -y && yum install -y httpd git");
+    userData.addCommands(
       "cd /var/www/html && git clone https://github.com/youngwjung/static-html-sample.git ."
     );
-    user_data.addCommands("systemctl enable httpd");
-    user_data.addCommands("systemctl start httpd");
+    userData.addCommands("systemctl enable httpd");
+    userData.addCommands("systemctl start httpd");
 
     const instance = new ec2.Instance(this, "instance", {
       vpc: vpc,
@@ -38,10 +38,10 @@ export class AlblogStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      userData: user_data,
+      userData: userData,
     });
 
-    const alb_log_bucket = new s3.Bucket(this, "alb_log_bucket", {
+    const albLogBucket = new s3.Bucket(this, "albLogBucket", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
@@ -50,26 +50,26 @@ export class AlblogStack extends cdk.Stack {
       internetFacing: true,
     });
 
-    lb.logAccessLogs(alb_log_bucket);
+    lb.logAccessLogs(albLogBucket);
 
-    const http_listener = lb.addListener("http_listener", {
+    const httpListener = lb.addListener("httpListener", {
       port: 80,
       open: true,
     });
 
-    http_listener.addTargets("web_target", {
+    httpListener.addTargets("webTarget", {
       port: 80,
       targets: [new InstanceTarget(instance)],
     });
 
     instance.connections.allowFrom(lb, ec2.Port.tcp(80));
 
-    const zombie_user_data = ec2.UserData.forLinux();
-    zombie_user_data.addCommands(
+    const zombieUserData = ec2.UserData.forLinux();
+    zombieUserData.addCommands(
       "yum update -y && yum install -y python3 python3-devel gcc"
     );
-    zombie_user_data.addCommands("pip3 install locust");
-    zombie_user_data.addCommands(
+    zombieUserData.addCommands("pip3 install locust");
+    zombieUserData.addCommands(
       "cat <<EOF >> /home/ec2-user/locust.py",
       "import time",
       "from locust import HttpUser, task",
@@ -82,7 +82,7 @@ export class AlblogStack extends cdk.Stack {
       "    wait_time = between(0.1, 0.5)",
       "EOF"
     );
-    zombie_user_data.addCommands(
+    zombieUserData.addCommands(
       `locust -f /home/ec2-user/locust.py --headless -u $(shuf -i 1-5 -n 1) -r $(shuf -i 1-5 -n 1) --host http://${lb.loadBalancerDnsName}`
     );
 
@@ -95,17 +95,17 @@ export class AlblogStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      userData: zombie_user_data,
+      userData: zombieUserData,
       minCapacity: 4,
       maxCapacity: 4,
     });
 
-    new CfnOutput(this, "output_site_url", {
+    new CfnOutput(this, "siteUrl", {
       value: lb.loadBalancerDnsName,
     });
 
-    new CfnOutput(this, "log_bucket", {
-      value: alb_log_bucket.bucketName,
+    new CfnOutput(this, "logBucket", {
+      value: albLogBucket.bucketName,
     });
   }
 }

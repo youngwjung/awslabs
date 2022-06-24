@@ -29,7 +29,7 @@ export class PortforwadingStack extends cdk.Stack {
       ],
     });
 
-    const bastion_host = new ec2.BastionHostLinux(this, "bastion_host", {
+    const bastionHost = new ec2.BastionHostLinux(this, "bastionHost", {
       vpc: vpc,
     });
 
@@ -49,13 +49,13 @@ export class PortforwadingStack extends cdk.Stack {
       },
     });
 
-    mysql.connections.allowDefaultPortFrom(bastion_host);
+    mysql.connections.allowDefaultPortFrom(bastionHost);
 
-    new CfnOutput(this, "MySQLConnectionSecret", {
+    new CfnOutput(this, "mySQLConnectionSecret", {
       value: mysql.secret?.secretName!,
     });
 
-    new CfnOutput(this, "MySQLEndpoint", {
+    new CfnOutput(this, "mySQLEndpoint", {
       value: mysql.instanceEndpoint.socketAddress,
     });
   }

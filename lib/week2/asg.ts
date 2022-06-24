@@ -19,16 +19,16 @@ export class AsgStack extends cdk.Stack {
       ],
     });
 
-    const user_data = ec2.UserData.forLinux();
-    user_data.addCommands("yum update -y && yum install -y httpd");
-    user_data.addCommands(
+    const userData = ec2.UserData.forLinux();
+    userData.addCommands("yum update -y && yum install -y httpd");
+    userData.addCommands(
       "curl http://169.254.169.254/latest/meta-data/public-ipv4 > /tmp/ip.txt"
     );
-    user_data.addCommands("cp /tmp/ip.txt /var/www/html/index.html");
-    user_data.addCommands("## Simulate booting time by sleep command");
-    user_data.addCommands("sleep 300");
-    user_data.addCommands("systemctl enable httpd");
-    user_data.addCommands("systemctl start httpd");
+    userData.addCommands("cp /tmp/ip.txt /var/www/html/index.html");
+    userData.addCommands("## Simulate booting time by sleep command");
+    userData.addCommands("sleep 300");
+    userData.addCommands("systemctl enable httpd");
+    userData.addCommands("systemctl start httpd");
 
     const asg = new autoscaling.AutoScalingGroup(this, "asg", {
       vpc: vpc,
@@ -39,7 +39,7 @@ export class AsgStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      userData: user_data,
+      userData: userData,
       healthCheck: {
         type: "ELB",
         gracePeriod: cdk.Duration.seconds(60),
@@ -51,12 +51,12 @@ export class AsgStack extends cdk.Stack {
       internetFacing: true,
     });
 
-    const http_listener = lb.addListener("http_listener", {
+    const httpListener = lb.addListener("httpListener", {
       port: 80,
       open: true,
     });
 
-    http_listener.addTargets("web_target", {
+    httpListener.addTargets("webTarget", {
       port: 80,
       targets: [asg],
       deregistrationDelay: cdk.Duration.seconds(60),
@@ -64,7 +64,7 @@ export class AsgStack extends cdk.Stack {
 
     asg.connections.allowFrom(lb, ec2.Port.tcp(80));
 
-    new CfnOutput(this, "output_site_url", {
+    new CfnOutput(this, "siteUrl", {
       value: lb.loadBalancerDnsName,
     });
   }

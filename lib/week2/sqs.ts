@@ -23,7 +23,7 @@ export class SqsStack extends cdk.Stack {
 
     const queue = new sqs.Queue(this, "queue");
 
-    const queue_url = new ssm.StringParameter(this, "queue_url", {
+    const queueUrl = new ssm.StringParameter(this, "queueUrl", {
       parameterName: "week2_sqs_url",
       stringValue: queue.queueUrl,
     });
@@ -33,19 +33,19 @@ export class SqsStack extends cdk.Stack {
       statistic: "Sum",
     });
 
-    const sender_user_data = ec2.UserData.forLinux();
-    sender_user_data.addCommands(
+    const senderUserData = ec2.UserData.forLinux();
+    senderUserData.addCommands(
       "yum update -y && yum install -y git python3-3.7*"
     );
-    sender_user_data.addCommands("pip3 install boto3 requests");
-    sender_user_data.addCommands(
+    senderUserData.addCommands("pip3 install boto3 requests");
+    senderUserData.addCommands(
       "cd /home/ec2-user/ && git clone https://github.com/youngwjung/sqs-demo.git"
     );
-    sender_user_data.addCommands(
+    senderUserData.addCommands(
       "nohup python3 /home/ec2-user/sqs-demo/sender.py &"
     );
 
-    const sender_instance = new ec2.Instance(this, "sender_instance", {
+    const senderInstance = new ec2.Instance(this, "senderInstance", {
       vpc: vpc,
       instanceType: ec2.InstanceType.of(
         ec2.InstanceClass.T2,
@@ -54,30 +54,30 @@ export class SqsStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      userData: sender_user_data,
+      userData: senderUserData,
     });
 
-    sender_instance.role.addManagedPolicy(
+    senderInstance.role.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName(
         "service-role/AmazonEC2RoleforSSM"
       )
     );
-    sender_instance.role.addManagedPolicy(
+    senderInstance.role.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSQSFullAccess")
     );
-    sender_instance.role.addManagedPolicy(
+    senderInstance.role.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMFullAccess")
     );
 
-    const asg_user_data = ec2.UserData.forLinux();
-    asg_user_data.addCommands(
+    const asgUserData = ec2.UserData.forLinux();
+    asgUserData.addCommands(
       "yum update -y && yum install -y httpd git python3-3.7*"
     );
-    asg_user_data.addCommands("pip3 install boto3 requests");
-    asg_user_data.addCommands(
+    asgUserData.addCommands("pip3 install boto3 requests");
+    asgUserData.addCommands(
       "cd /home/ec2-user/ && git clone https://github.com/youngwjung/sqs-demo.git"
     );
-    asg_user_data.addCommands(
+    asgUserData.addCommands(
       "nohup python3 /home/ec2-user/sqs-demo/worker.py &"
     );
 
@@ -91,7 +91,7 @@ export class SqsStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      userData: asg_user_data,
+      userData: asgUserData,
     });
 
     asg.role.addManagedPolicy(
@@ -106,9 +106,9 @@ export class SqsStack extends cdk.Stack {
       iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonSSMFullAccess")
     );
 
-    const scale_out_action = new autoscaling.CfnScalingPolicy(
+    const scaleOutAction = new autoscaling.CfnScalingPolicy(
       this,
-      "scale_out_action",
+      "scaleOutAction",
       {
         autoScalingGroupName: asg.autoScalingGroupName,
         adjustmentType: "ChangeInCapacity",
@@ -116,10 +116,10 @@ export class SqsStack extends cdk.Stack {
       }
     );
 
-    const scale_out = new cw.CfnAlarm(this, "scale_out", {
+    const scaleOut = new cw.CfnAlarm(this, "scaleOut", {
       comparisonOperator: "GreaterThanOrEqualToThreshold",
       evaluationPeriods: 1,
-      alarmActions: [scale_out_action.ref],
+      alarmActions: [scaleOutAction.ref],
       statistic: "Sum",
       threshold: 10,
       period: 60,
@@ -133,9 +133,9 @@ export class SqsStack extends cdk.Stack {
       ],
     });
 
-    const scale_in_action = new autoscaling.CfnScalingPolicy(
+    const scaleInAction = new autoscaling.CfnScalingPolicy(
       this,
-      "scale_in_action",
+      "scaleInAction",
       {
         autoScalingGroupName: asg.autoScalingGroupName,
         adjustmentType: "ChangeInCapacity",
@@ -143,10 +143,10 @@ export class SqsStack extends cdk.Stack {
       }
     );
 
-    const scale_in = new cw.CfnAlarm(this, "scale_in", {
+    const scaleIn = new cw.CfnAlarm(this, "scaleIn", {
       comparisonOperator: "LessThanOrEqualToThreshold",
       evaluationPeriods: 1,
-      alarmActions: [scale_in_action.ref],
+      alarmActions: [scaleInAction.ref],
       statistic: "Sum",
       threshold: 5,
       period: 60,
