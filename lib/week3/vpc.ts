@@ -188,25 +188,15 @@ export class VpcStack extends cdk.Stack {
       securityGroup: bastionHostSg,
     });
 
-    const userData = ec2.UserData.forLinux();
-    userData.addCommands("yum update -y && yum install -y httpd");
-    userData.addCommands(
-      "curl http://169.254.169.254/latest/meta-data/public-ipv4 > /tmp/ip.txt"
-    );
-    userData.addCommands("cp /tmp/ip.txt /var/www/html/index.html");
-    userData.addCommands("systemctl enable httpd");
-    userData.addCommands("systemctl start httpd");
-
     const webServer = new ec2.Instance(this, "webServer", {
       vpc: vpc,
       instanceType: ec2.InstanceType.of(
         ec2.InstanceClass.T2,
         ec2.InstanceSize.MICRO
       ),
-      machineImage: ec2.MachineImage.latestAmazonLinux({
-        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
+      machineImage: ec2.MachineImage.genericLinux({
+        "ap-northeast-2": "ami-0cb7146396a8ab3d7",
       }),
-      userData: userData,
       keyName: keyPair.valueAsString,
       vpcSubnets: {
         subnets: [privateSubnet1],
