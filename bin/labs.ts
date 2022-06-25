@@ -36,19 +36,30 @@ import { Eks101EventEngineStack } from "../lib/kubermetes/eks101-eventengine";
 import { ServerlessStack } from "../lib/msa/serverless";
 
 const app = new cdk.App();
+
+// Week 1
 new EipStack(app, "eip");
 new EbsStack(app, "ebs");
 new CliStack(app, "cli");
+new BrokenStack(app, "broken");
+
+// Week 2
 new SslStack(app, "ssl");
 new ElbStack(app, "elb");
 new AsgStack(app, "asg");
 new SqsStack(app, "sqs");
 new ColorStack(app, "color");
+
+// Week 3
 new VpcStack(app, "vpc");
 new TransitStack(app, "transit");
+
+// Week 5
 new PresignedStack(app, "presigned");
 new VPCEndpointStack(app, "vpcendpoint");
 new EfsStack(app, "efs");
+
+// Week 6
 new AlblogStack(app, "alb-log", {
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
@@ -61,16 +72,24 @@ new GuarddutyStack(app, "guard-duty");
 new CognitoStack(app, "cognito");
 new SecretsStack(app, "secrets");
 new SecretsAnswerStack(app, "secrets-answer");
+
+// Week 7
 new CwlogStack(app, "cw-log");
 new CwmetricStack(app, "cw-metric");
 new CweventStack(app, "cw-event");
 new PortforwadingStack(app, "port-forwarding");
 new ConfigStack(app, "config");
 
-new KinesisStack(app, "kinesis");
+// Week 8
 new CodeCommitStack(app, "codecommit");
 new CodeDeployStack(app, "codedeploy");
+
+// Data Analytics
+new KinesisStack(app, "kinesis");
+
+// EKS
 new EksStack(app, "eks");
 new Eks101EventEngineStack(app, "eks101-event");
+
+// Serverless
 new ServerlessStack(app, "serverless");
-new BrokenStack(app, "broken");
