@@ -13,6 +13,7 @@ import { ColorStack } from "../lib/week2/color";
 import { VpcStack } from "../lib/week3/vpc";
 import { TransitStack } from "../lib/week3/transit";
 import { RestoreStack } from "../lib/week4/restore";
+import { MultiAZStack } from "../lib/week4/multi-az";
 import { PresignedStack } from "../lib/week5/presigned";
 import { VPCEndpointStack } from "../lib/week5/vpc-endpoint";
 import { EfsStack } from "../lib/week5/efs";
@@ -57,6 +58,7 @@ new TransitStack(app, "transit");
 
 // Week 4
 new RestoreStack(app, "restore");
+new MultiAZStack(app, "multi-az");
 
 // Week 5
 new PresignedStack(app, "presigned");
