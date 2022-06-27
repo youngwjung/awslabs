@@ -118,6 +118,10 @@ export class RestoreStack extends cdk.Stack {
 
     delay.node.addDependency(tempInstance);
 
+    new CfnOutput(this, "rdsInstanceIdentifier", {
+      value: mysql.instanceIdentifier,
+    });
+
     new CfnOutput(this, "rdsCredentials", {
       value: mysql.secret!.secretName,
     });

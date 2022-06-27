@@ -98,5 +98,9 @@ export class RdsIamStack extends cdk.Stack {
         "service-role/AmazonEC2RoleforSSM"
       )
     );
+
+    new CfnOutput(this, "rdsInstanceIdentifier", {
+      value: mysql.instanceIdentifier,
+    });
   }
 }
