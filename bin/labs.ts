@@ -11,7 +11,8 @@ import { AsgStack } from "../lib/week2/asg";
 import { SqsStack } from "../lib/week2/sqs";
 import { ColorStack } from "../lib/week2/color";
 import { VpcStack } from "../lib/week3/vpc";
-import { MultiVpcStack } from "../lib/week3/multi-vpc";
+import { PeeringStack } from "../lib/week3/peering";
+import { TransitStack } from "../lib/week3/transit";
 import { RestoreStack } from "../lib/week4/restore";
 import { MultiAZStack } from "../lib/week4/multi-az";
 import { RdsIamStack } from "../lib/week4/rds-iam";
@@ -55,8 +56,8 @@ new ColorStack(app, "color");
 
 // Week 3
 new VpcStack(app, "vpc");
-new MultiVpcStack(app, "peering");
-new MultiVpcStack(app, "transit");
+new PeeringStack(app, "peering");
+new TransitStack(app, "transit");
 
 // Week 4
 new RestoreStack(app, "restore");
