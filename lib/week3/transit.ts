@@ -1,15 +1,11 @@
 import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
+import * as iam from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
 
 export class TransitStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
-
-    const keyPair = new cdk.CfnParameter(this, "keyPair", {
-      type: "AWS::EC2::KeyPair::KeyName",
-      description: "An Amazon EC2 key pair name.",
-    });
 
     // VPC
     const vpcA = new ec2.Vpc(this, "vpcA", {
@@ -26,26 +22,26 @@ export class TransitStack extends cdk.Stack {
     });
 
     const vpcB = new ec2.Vpc(this, "vpcB", {
-      cidr: "172.16.0.0/16",
+      cidr: "10.1.0.0/16",
       maxAzs: 1,
       subnetConfiguration: [
         {
           cidrMask: 24,
           name: "private",
-          subnetType: ec2.SubnetType.ISOLATED,
+          subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
         },
       ],
       natGateways: 0,
     });
 
     const vpcC = new ec2.Vpc(this, "vpcC", {
-      cidr: "10.0.0.0/16",
+      cidr: "10.2.0.0/16",
       maxAzs: 1,
       subnetConfiguration: [
         {
           cidrMask: 24,
           name: "private",
-          subnetType: ec2.SubnetType.ISOLATED,
+          subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
         },
       ],
       natGateways: 0,
@@ -60,12 +56,17 @@ export class TransitStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      keyName: keyPair.valueAsString,
       instanceName: "A",
       vpcSubnets: {
         subnets: [vpcA.publicSubnets[0]],
       },
     });
+
+    instanceA.role.addManagedPolicy(
+      iam.ManagedPolicy.fromAwsManagedPolicyName(
+        "service-role/AmazonEC2RoleforSSM"
+      )
+    );
 
     const instanceB = new ec2.Instance(this, "instanceB", {
       vpc: vpcB,
@@ -76,7 +77,6 @@ export class TransitStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      keyName: keyPair.valueAsString,
       instanceName: "B",
       vpcSubnets: {
         subnets: [vpcB.isolatedSubnets[0]],
@@ -92,7 +92,6 @@ export class TransitStack extends cdk.Stack {
       machineImage: ec2.MachineImage.latestAmazonLinux({
         generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
       }),
-      keyName: keyPair.valueAsString,
       instanceName: "C",
       vpcSubnets: {
         subnets: [vpcC.isolatedSubnets[0]],
