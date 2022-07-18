@@ -2,6 +2,8 @@ import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as s3 from "aws-cdk-lib/aws-s3";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as cr from "aws-cdk-lib/custom-resources";
 import { Construct } from "constructs";
 
 export class GuarddutyStack extends cdk.Stack {
@@ -35,6 +37,7 @@ export class GuarddutyStack extends cdk.Stack {
         blockPublicPolicy: false,
       }),
       removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
     });
     bucket.grantPublicAccess();
 
@@ -123,5 +126,25 @@ export class GuarddutyStack extends cdk.Stack {
     zombieInstance.role.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName("IAMFullAccess")
     );
+
+    const delayGenerator = new lambda.Function(this, "delayGenerator", {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      code: lambda.Code.fromAsset("lambda/wait"),
+      handler: "app.on_event",
+      timeout: cdk.Duration.minutes(15),
+    });
+
+    const delayProvider = new cr.Provider(this, "delayProvider", {
+      onEventHandler: delayGenerator,
+    });
+
+    const delay = new cdk.CustomResource(this, "delay", {
+      serviceToken: delayProvider.serviceToken,
+      properties: {
+        time: 600,
+      },
+    });
+
+    delay.node.addDependency(zombieInstance);
   }
 }
