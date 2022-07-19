@@ -8,7 +8,7 @@ export class SslStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const keyPair = new cdk.CfnParameter(this, "keypair", {
+    const keyPair = new cdk.CfnParameter(this, "keyPair", {
       type: "AWS::EC2::KeyPair::KeyName",
       description: "An Amazon EC2 key pair name.",
     });
