@@ -32,6 +32,7 @@ export class PresignedStack extends cdk.Stack {
 
     const bucket = new Bucket(this, "bucket", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
     });
 
     bucket.addToResourcePolicy(
