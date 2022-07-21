@@ -27,8 +27,17 @@ export class VPCEndpointStack extends cdk.Stack {
       service: ec2.InterfaceVpcEndpointAwsService.SSM_MESSAGES,
     });
 
+    vpc.addInterfaceEndpoint("ec2messagesVpcEndpoint", {
+      service: ec2.InterfaceVpcEndpointAwsService.EC2_MESSAGES,
+    });
+
+    vpc.addInterfaceEndpoint("cwlogsVpcEndpoint", {
+      service: ec2.InterfaceVpcEndpointAwsService.CLOUDWATCH_LOGS,
+    });
+
     const bucket = new s3.Bucket(this, "bucket", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
     });
 
     bucket.addToResourcePolicy(
