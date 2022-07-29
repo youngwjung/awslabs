@@ -43,6 +43,7 @@ export class AlblogStack extends cdk.Stack {
 
     const albLogBucket = new s3.Bucket(this, "albLogBucket", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
     });
 
     const lb = new elbv2.ApplicationLoadBalancer(this, "lb", {
