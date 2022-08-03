@@ -22,7 +22,7 @@ export class CwlogStack extends cdk.Stack {
 
     const postgres = new rds.DatabaseInstance(this, "postgres", {
       engine: rds.DatabaseInstanceEngine.postgres({
-        version: rds.PostgresEngineVersion.VER_10_14,
+        version: rds.PostgresEngineVersion.VER_10_20,
       }),
       vpc: vpc,
       instanceType: ec2.InstanceType.of(
