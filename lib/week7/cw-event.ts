@@ -2,7 +2,6 @@ import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as autoscaling from "aws-cdk-lib/aws-autoscaling";
 import * as lambda from "aws-cdk-lib/aws-lambda";
-import { CfnOutput } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
 export class CweventStack extends cdk.Stack {
@@ -42,11 +41,11 @@ export class CweventStack extends cdk.Stack {
     slackNotification.addEnvironment("SLACK_CHANNEL", "");
     slackNotification.addEnvironment("WEBHOOK_URL", "");
 
-    new CfnOutput(this, "lambdaFunctionName", {
+    new cdk.CfnOutput(this, "LambdaFunctionName", {
       value: slackNotification.functionName,
     });
 
-    new CfnOutput(this, "autoScalingGroupName", {
+    new cdk.CfnOutput(this, "AutoScalingGroupName", {
       value: asg.autoScalingGroupName,
     });
   }

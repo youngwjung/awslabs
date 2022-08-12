@@ -2,7 +2,6 @@ import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as route53 from "aws-cdk-lib/aws-route53";
-import { CfnOutput } from "aws-cdk-lib";
 import { InstanceTarget } from "aws-cdk-lib/aws-elasticloadbalancingv2-targets";
 import { LoadBalancerTarget } from "aws-cdk-lib/aws-route53-targets";
 import { Construct } from "constructs";
@@ -93,8 +92,16 @@ export class ElbStack extends cdk.Stack {
       recordName: "elb",
     });
 
-    new CfnOutput(this, "siteUrl", {
+    new cdk.CfnOutput(this, "SiteURL", {
       value: domainRecord.domainName,
+    });
+
+    new cdk.CfnOutput(this, "LoadBalancerName", {
+      value: lb.loadBalancerName,
+    });
+
+    new cdk.CfnOutput(this, "InstanceId", {
+      value: instance.instanceId,
     });
   }
 }

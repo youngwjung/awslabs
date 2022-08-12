@@ -40,5 +40,12 @@ export class EipStack extends cdk.Stack {
       userData: userData,
       keyName: keyPair.valueAsString,
     });
+
+    new cdk.CfnOutput(this, "InstancePublicIP", {
+      value: instance.instancePublicIp,
+    });
+    new cdk.CfnOutput(this, "InstanceId", {
+      value: instance.instanceId,
+    });
   }
 }

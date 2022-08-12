@@ -1,7 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as route53 from "aws-cdk-lib/aws-route53";
-import { CfnOutput } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
 export class SslStack extends cdk.Stack {
@@ -74,8 +73,12 @@ export class SslStack extends cdk.Stack {
       recordName: "ssl",
     });
 
-    new CfnOutput(this, "siteUrl", {
+    new cdk.CfnOutput(this, "SiteURL", {
       value: domainRecord.domainName,
+    });
+
+    new cdk.CfnOutput(this, "InstanceId", {
+      value: instance.instanceId,
     });
   }
 }

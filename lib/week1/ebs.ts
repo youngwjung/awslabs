@@ -54,5 +54,9 @@ export class EbsStack extends cdk.Stack {
       keyName: keyPair.valueAsString,
       role: role,
     });
+
+    new cdk.CfnOutput(this, "InstanceId", {
+      value: instance.instanceId,
+    });
   }
 }

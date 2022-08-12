@@ -1,7 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as rds from "aws-cdk-lib/aws-rds";
-import { CfnOutput } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
 export class PortforwadingStack extends cdk.Stack {
@@ -51,12 +50,8 @@ export class PortforwadingStack extends cdk.Stack {
 
     mysql.connections.allowDefaultPortFrom(bastionHost);
 
-    new CfnOutput(this, "mySQLConnectionSecret", {
+    new cdk.CfnOutput(this, "RdsConnectionInfo", {
       value: mysql.secret?.secretName!,
-    });
-
-    new CfnOutput(this, "mySQLEndpoint", {
-      value: mysql.instanceEndpoint.socketAddress,
     });
   }
 }

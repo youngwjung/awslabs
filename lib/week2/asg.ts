@@ -2,7 +2,6 @@ import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as autoscaling from "aws-cdk-lib/aws-autoscaling";
-import { CfnOutput } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
 export class AsgStack extends cdk.Stack {
@@ -64,8 +63,16 @@ export class AsgStack extends cdk.Stack {
 
     asg.connections.allowFrom(lb, ec2.Port.tcp(80));
 
-    new CfnOutput(this, "siteUrl", {
+    new cdk.CfnOutput(this, "SiteURL", {
       value: lb.loadBalancerDnsName,
+    });
+
+    new cdk.CfnOutput(this, "AutoScalingGroupName", {
+      value: asg.autoScalingGroupName,
+    });
+
+    new cdk.CfnOutput(this, "LoadBalancerName", {
+      value: lb.loadBalancerName,
     });
   }
 }

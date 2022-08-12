@@ -1,6 +1,5 @@
 import * as cdk from "aws-cdk-lib";
 import * as iam from "aws-cdk-lib/aws-iam";
-import { CfnOutput } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
 export class ConfigStack extends cdk.Stack {
@@ -32,7 +31,7 @@ export class ConfigStack extends cdk.Stack {
       })
     );
 
-    new CfnOutput(this, "AutomationRoleArn", {
+    new cdk.CfnOutput(this, "AutomationRoleArn", {
       value: automationRole.roleArn,
     });
   }

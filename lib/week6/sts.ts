@@ -1,7 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
-import { CfnOutput } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
 export class StsStack extends cdk.Stack {
@@ -68,20 +67,24 @@ export class StsStack extends cdk.Stack {
       iam.ManagedPolicy.fromAwsManagedPolicyName("AmazonS3ReadOnlyAccess")
     );
 
-    new CfnOutput(this, "iamUserName", {
+    new cdk.CfnOutput(this, "UserName", {
       value: iamUser.userName,
     });
 
-    new CfnOutput(this, "iamUserArn", {
+    new cdk.CfnOutput(this, "UserArn", {
       value: iamUser.userArn,
     });
 
-    new CfnOutput(this, "iamRoleArn", {
+    new cdk.CfnOutput(this, "RoleArn", {
       value: iamRole.roleArn,
     });
 
-    new CfnOutput(this, "iamRoleName", {
+    new cdk.CfnOutput(this, "RoleName", {
       value: iamRole.roleName,
+    });
+
+    new cdk.CfnOutput(this, "InstanceId", {
+      value: instance.instanceId,
     });
   }
 }

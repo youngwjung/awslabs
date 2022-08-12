@@ -122,8 +122,20 @@ export class ColorStack extends cdk.Stack {
       recordName: "color",
     });
 
-    new CfnOutput(this, "siteUrl", {
+    new CfnOutput(this, "SiteURL", {
       value: domainRecord.domainName,
+    });
+
+    new cdk.CfnOutput(this, "LoadBalancerName", {
+      value: lb.loadBalancerName,
+    });
+
+    new cdk.CfnOutput(this, "GreenInstanceId", {
+      value: greenInstance.instanceId,
+    });
+
+    new cdk.CfnOutput(this, "BlueInstanceId", {
+      value: blueInstance.instanceId,
     });
   }
 }

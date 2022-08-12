@@ -3,8 +3,6 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as lambda from "aws-cdk-lib/aws-lambda";
-import * as cr from "aws-cdk-lib/custom-resources";
-import { CfnOutput } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
 export class MultiAZStack extends cdk.Stack {
@@ -136,8 +134,16 @@ export class MultiAZStack extends cdk.Stack {
       });
     }
 
-    new CfnOutput(this, "rdsCredentials", {
+    new cdk.CfnOutput(this, "RdsConnectionInfo", {
       value: prodDatabase.secret!.secretName,
+    });
+
+    new cdk.CfnOutput(this, "RdsInstanceName", {
+      value: prodDatabase.instanceIdentifier,
+    });
+
+    new cdk.CfnOutput(this, "InstanceId", {
+      value: instance.instanceId,
     });
   }
 }

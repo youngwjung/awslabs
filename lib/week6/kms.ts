@@ -4,7 +4,6 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as sm from "aws-cdk-lib/aws-secretsmanager";
 import * as kms from "aws-cdk-lib/aws-kms";
-import { CfnOutput } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
 export class KmsStack extends cdk.Stack {
@@ -129,27 +128,27 @@ export class KmsStack extends cdk.Stack {
       ],
     });
 
-    new CfnOutput(this, "rdsCredentials", {
+    new cdk.CfnOutput(this, "RdsConnectionInfo", {
       value: dbSecret.secretName,
     });
 
-    new CfnOutput(this, "rdsEncryptionKey", {
+    new cdk.CfnOutput(this, "KmsKey", {
       value: encryptionKey.keyId,
     });
 
-    new CfnOutput(this, "dbRecordValue", {
+    new cdk.CfnOutput(this, "Answer", {
       value: randomString.secretName,
     });
 
-    new CfnOutput(this, "iamUserName", {
+    new cdk.CfnOutput(this, "UserName", {
       value: iamUser.userName,
     });
 
-    new CfnOutput(this, "iamUserPassword", {
+    new cdk.CfnOutput(this, "UserPassword", {
       value: "Asdf!23456",
     });
 
-    new CfnOutput(this, "signInUrl", {
+    new cdk.CfnOutput(this, "SignInURL", {
       value: `https://${this.account}.signin.aws.amazon.com/console`,
     });
   }

@@ -3,7 +3,6 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as iam from "aws-cdk-lib/aws-iam";
-import { CfnOutput } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
 export class CognitoStack extends cdk.Stack {
@@ -100,18 +99,23 @@ export class CognitoStack extends cdk.Stack {
 
     const bucket = new s3.Bucket(this, "bucket", {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
     });
 
-    new CfnOutput(this, "bucketName", {
+    new cdk.CfnOutput(this, "BucketName", {
       value: bucket.bucketName,
     });
 
-    new CfnOutput(this, "appClientId", {
-      value: appClient.userPoolClientId,
+    new cdk.CfnOutput(this, "UserPoolId", {
+      value: userPool.userPoolId,
     });
 
-    new CfnOutput(this, "identityPoolId", {
+    new cdk.CfnOutput(this, "IdentityPoolId", {
       value: identityPool.ref,
+    });
+
+    new cdk.CfnOutput(this, "InstanceId", {
+      value: instance.instanceId,
     });
   }
 }

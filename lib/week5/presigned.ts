@@ -3,7 +3,6 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import { Bucket } from "aws-cdk-lib/aws-s3";
-import { CfnOutput } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
 export class PresignedStack extends cdk.Stack {
@@ -111,8 +110,12 @@ export class PresignedStack extends cdk.Stack {
       ttl: cdk.Duration.seconds(60),
     });
 
-    new CfnOutput(this, "siteUrl", {
+    new cdk.CfnOutput(this, "SiteURL", {
       value: domainRecord.domainName,
+    });
+
+    new cdk.CfnOutput(this, "InstanceId", {
+      value: app.instanceId,
     });
   }
 }

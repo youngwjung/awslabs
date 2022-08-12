@@ -3,7 +3,6 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as lambda from "aws-cdk-lib/aws-lambda";
-import { CfnOutput } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
 export class CwlogStack extends cdk.Stack {
@@ -98,15 +97,18 @@ export class CwlogStack extends cdk.Stack {
       })
     );
 
-    new CfnOutput(this, "webServerIP", {
+    new cdk.CfnOutput(this, "InstancePublicIP", {
       value: instance.instancePublicIp,
     });
+    new cdk.CfnOutput(this, "InstanceId", {
+      value: instance.instanceId,
+    });
 
-    new CfnOutput(this, "webServerErrorPage", {
+    new cdk.CfnOutput(this, "WebServerErrorPath", {
       value: `${instance.instancePublicIp}/error`,
     });
 
-    new CfnOutput(this, "lambdaFunctionName", {
+    new cdk.CfnOutput(this, "LambdaFunctionName", {
       value: cwToSns.functionName,
     });
   }

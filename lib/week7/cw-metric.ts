@@ -56,5 +56,9 @@ export class CwmetricStack extends cdk.Stack {
     instance.role.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName("CloudWatchAgentServerPolicy")
     );
+
+    new cdk.CfnOutput(this, "InstanceId", {
+      value: instance.instanceId,
+    });
   }
 }

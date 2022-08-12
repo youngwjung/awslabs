@@ -2,8 +2,6 @@ import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as targets from "aws-cdk-lib/aws-elasticloadbalancingv2-targets";
-import { CfnOutput } from "aws-cdk-lib";
-import { SubnetNetworkAclAssociation } from "aws-cdk-lib/aws-ec2";
 import { Construct } from "constructs";
 
 export class VpcStack extends cdk.Stack {
@@ -226,8 +224,20 @@ export class VpcStack extends cdk.Stack {
 
     webServer.connections.allowFrom(lb, ec2.Port.tcp(8080));
 
-    new CfnOutput(this, "siteUrl", {
+    new cdk.CfnOutput(this, "SiteURL", {
       value: lb.loadBalancerDnsName,
+    });
+
+    new cdk.CfnOutput(this, "InstanceId", {
+      value: webServer.instanceId,
+    });
+
+    new cdk.CfnOutput(this, "VPCId", {
+      value: vpc.vpcId,
+    });
+
+    new cdk.CfnOutput(this, "LoadBalancerName", {
+      value: lb.loadBalancerName,
     });
   }
 }

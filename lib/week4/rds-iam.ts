@@ -2,9 +2,6 @@ import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as rds from "aws-cdk-lib/aws-rds";
-import * as lambda from "aws-cdk-lib/aws-lambda";
-import * as cr from "aws-cdk-lib/custom-resources";
-import { CfnOutput } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
 export class RdsIamStack extends cdk.Stack {
@@ -99,8 +96,12 @@ export class RdsIamStack extends cdk.Stack {
       )
     );
 
-    new CfnOutput(this, "rdsInstanceIdentifier", {
+    new cdk.CfnOutput(this, "RdsInstanceName", {
       value: mysql.instanceIdentifier,
+    });
+
+    new cdk.CfnOutput(this, "InstanceId", {
+      value: instance.instanceId,
     });
   }
 }

@@ -2,7 +2,6 @@ import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as iam from "aws-cdk-lib/aws-iam";
 import { Bucket } from "aws-cdk-lib/aws-s3";
-import { CfnOutput, RemovalPolicy } from "aws-cdk-lib";
 import { Construct } from "constructs";
 
 export class CliStack extends cdk.Stack {
@@ -61,11 +60,19 @@ export class CliStack extends cdk.Stack {
 
     const bucket = new Bucket(this, "bucket", {
       autoDeleteObjects: true,
-      removalPolicy: RemovalPolicy.DESTROY,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
-    const output = new CfnOutput(this, "BucketName", {
+    new cdk.CfnOutput(this, "BucketName", {
       value: bucket.bucketName,
+    });
+
+    new cdk.CfnOutput(this, "MasterInstanceId", {
+      value: masterInstance.instanceId,
+    });
+
+    new cdk.CfnOutput(this, "SlaveInstanceId", {
+      value: slaveInstance.instanceId,
     });
   }
 }

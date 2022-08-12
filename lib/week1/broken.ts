@@ -69,5 +69,9 @@ export class BrokenStack extends cdk.Stack {
         time: 600,
       },
     });
+
+    new cdk.CfnOutput(this, "InstanceId", {
+      value: instance.instanceId,
+    });
   }
 }

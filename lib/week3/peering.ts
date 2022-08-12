@@ -98,5 +98,29 @@ export class PeeringStack extends cdk.Stack {
         subnets: [vpcC.isolatedSubnets[0]],
       },
     });
+
+    new cdk.CfnOutput(this, "InstanceAId", {
+      value: instanceA.instanceId,
+    });
+
+    new cdk.CfnOutput(this, "InstanceBId", {
+      value: instanceB.instanceId,
+    });
+
+    new cdk.CfnOutput(this, "InstanceCId", {
+      value: instanceC.instanceId,
+    });
+
+    new cdk.CfnOutput(this, "VpcAId", {
+      value: vpcA.vpcId,
+    });
+
+    new cdk.CfnOutput(this, "VpcBId", {
+      value: vpcB.vpcId,
+    });
+
+    new cdk.CfnOutput(this, "VpcCId", {
+      value: vpcC.vpcId,
+    });
   }
 }

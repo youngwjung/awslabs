@@ -3,7 +3,6 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as autoscaling from "aws-cdk-lib/aws-autoscaling";
 import * as s3 from "aws-cdk-lib/aws-s3";
-import { CfnOutput } from "aws-cdk-lib";
 import { InstanceTarget } from "aws-cdk-lib/aws-elasticloadbalancingv2-targets";
 import { Construct } from "constructs";
 
@@ -101,11 +100,15 @@ export class AlblogStack extends cdk.Stack {
       maxCapacity: 4,
     });
 
-    new CfnOutput(this, "siteUrl", {
+    new cdk.CfnOutput(this, "SiteURL", {
       value: lb.loadBalancerDnsName,
     });
 
-    new CfnOutput(this, "logBucket", {
+    new cdk.CfnOutput(this, "LoadBalancerName", {
+      value: lb.loadBalancerName,
+    });
+
+    new cdk.CfnOutput(this, "LogBucketName", {
       value: albLogBucket.bucketName,
     });
   }
