@@ -31,12 +31,11 @@ import { CwmetricStack } from "../lib/week7/cw-metric";
 import { CweventStack } from "../lib/week7/cw-event";
 import { PortforwadingStack } from "../lib/week7/port-forwarding";
 import { ConfigStack } from "../lib/week7/config";
+import { CodeCommitStack } from "../lib/week8/codecommit";
+import { CodeBuildStack } from "../lib/week8/codebuild";
+import { CodeDeployStack } from "../lib/week8/codedeploy";
 
 import { KinesisStack } from "../lib/data/kinesis";
-import { CodeCommitStack } from "../lib/devops/codecommit";
-import { CodeDeployStack } from "../lib/devops/codedeploy";
-import { EksStack } from "../lib/kubermetes/eks";
-import { Eks101EventEngineStack } from "../lib/kubermetes/eks101-eventengine";
 import { ServerlessStack } from "../lib/msa/serverless";
 
 const app = new cdk.App();
@@ -92,14 +91,16 @@ new ConfigStack(app, "config");
 
 // Week 8
 new CodeCommitStack(app, "codecommit");
-new CodeDeployStack(app, "codedeploy");
+new CodeBuildStack(app, "codebuild");
+new CodeDeployStack(app, "codedeploy", {
+  env: {
+    account: process.env.CDK_DEFAULT_ACCOUNT,
+    region: process.env.CDK_DEFAULT_REGION,
+  },
+});
 
 // Data Analytics
 new KinesisStack(app, "kinesis");
-
-// EKS
-new EksStack(app, "eks");
-new Eks101EventEngineStack(app, "eks101-event");
 
 // Serverless
 new ServerlessStack(app, "serverless");

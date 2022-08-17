@@ -1,0 +1,10 @@
+[Unit]
+Description=My Web Server
+
+[Service]
+WorkingDirectory=/opt/app/
+ExecStart=/opt/app/my-web-server
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

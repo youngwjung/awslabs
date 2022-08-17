@@ -1,0 +1,22 @@
+version: 0.2
+
+env:
+  variables:
+    GO_VERSION: 1.16.5
+phases:
+  install:
+    commands:
+      - wget -q https://storage.googleapis.com/golang/go${GO_VERSION}.linux-amd64.tar.gz
+      - tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
+      - export PATH="/usr/local/go/bin:$PATH" && export GOPATH="$HOME/go" && export PATH="$GOPATH/bin:$PATH"
+  build:
+    commands:
+      - echo Start build...
+      - go build -o my-web-server main.go
+  post_build:
+    commands:
+      - echo Build completed
+      - rm main.go
+artifacts:
+  files:
+    - '**/*'

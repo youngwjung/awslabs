@@ -1,0 +1,16 @@
+version: 0.0
+os: linux
+files:
+  - source: my-web-server
+    destination: /opt/app
+  - source: scripts/my-web-server.service
+    destination: /etc/systemd/system
+hooks:
+  BeforeInstall:
+    - location: scripts/before_install.sh
+      timeout: 60
+      runas: root
+  ApplicationStart:
+    - location: scripts/start_server.sh
+      timeout: 60
+      runas: root
