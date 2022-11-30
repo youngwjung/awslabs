@@ -39,7 +39,7 @@ export class ElbStack extends cdk.Stack {
     userData.addCommands(
       "yum update -y && yum install -y httpd git mod_wsgi python3-3.7*"
     );
-    userData.addCommands("pip3 install flask");
+    userData.addCommands("pip3 install Flask==1.1.4");
     userData.addCommands(
       "git clone https://github.com/youngwjung/flask-ssl.git /var/www/html/"
     );
