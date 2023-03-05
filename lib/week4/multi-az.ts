@@ -47,7 +47,7 @@ export class MultiAZStack extends cdk.Stack {
 
     const prodDatabase = new rds.DatabaseInstance(this, "prodDatabase", {
       engine: rds.DatabaseInstanceEngine.mysql({
-        version: rds.MysqlEngineVersion.VER_8_0_21,
+        version: rds.MysqlEngineVersion.VER_8_0_28,
       }),
       vpc: vpc,
       instanceType: ec2.InstanceType.of(

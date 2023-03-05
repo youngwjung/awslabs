@@ -22,7 +22,7 @@ export class RestoreStack extends cdk.Stack {
 
     const mysql = new rds.DatabaseInstance(this, "mysql", {
       engine: rds.DatabaseInstanceEngine.mysql({
-        version: rds.MysqlEngineVersion.VER_8_0_21,
+        version: rds.MysqlEngineVersion.VER_8_0_28,
       }),
       vpc: vpc,
       instanceType: ec2.InstanceType.of(
