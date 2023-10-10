@@ -30,11 +30,11 @@ export class CodeBuildStack extends cdk.Stack {
           value: registry.repositoryName,
         },
         AWS_ACCOUNT_ID: {
-          value: this.account
+          value: this.account,
         },
       },
     });
-    
+
     const vpc = new ec2.Vpc(this, "vpc", {
       natGateways: 0,
       subnetConfiguration: [
@@ -44,16 +44,14 @@ export class CodeBuildStack extends cdk.Stack {
         },
       ],
     });
-    
+
     const instance = new ec2.Instance(this, "instance", {
       vpc: vpc,
       instanceType: ec2.InstanceType.of(
         ec2.InstanceClass.T3,
         ec2.InstanceSize.MICRO
       ),
-      machineImage: ec2.MachineImage.latestAmazonLinux({
-        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
-      }),
+      machineImage: ec2.MachineImage.latestAmazonLinux2023(),
     });
 
     instance.role.addManagedPolicy(
@@ -83,7 +81,7 @@ export class CodeBuildStack extends cdk.Stack {
     });
 
     runBuild.node.addDependency(buildProject);
-    
+
     new cdk.CfnOutput(this, "CodeCommitRepositoryName", {
       value: repository.repositoryName,
     });
@@ -95,7 +93,7 @@ export class CodeBuildStack extends cdk.Stack {
     new cdk.CfnOutput(this, "CodeBuildProjectName", {
       value: buildProject.projectName,
     });
-    
+
     new cdk.CfnOutput(this, "InstanceId", {
       value: instance.instanceId,
     });

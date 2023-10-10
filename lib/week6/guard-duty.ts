@@ -22,7 +22,7 @@ export class GuarddutyStack extends cdk.Stack {
 
     const zombieVpc = new ec2.Vpc(this, "zombieVpc", {
       natGateways: 0,
-      cidr: "192.168.0.0/16",
+      ipAddresses: ec2.IpAddresses.cidr("192.168.0.0/16"),
       subnetConfiguration: [
         {
           name: "public",
@@ -62,9 +62,7 @@ export class GuarddutyStack extends cdk.Stack {
         ec2.InstanceClass.T3,
         ec2.InstanceSize.MICRO
       ),
-      machineImage: ec2.MachineImage.latestAmazonLinux({
-        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
-      }),
+      machineImage: ec2.MachineImage.latestAmazonLinux2023(),
       userData: victimUserData,
       userDataCausesReplacement: true,
     });
@@ -108,9 +106,7 @@ export class GuarddutyStack extends cdk.Stack {
         ec2.InstanceClass.T3,
         ec2.InstanceSize.MICRO
       ),
-      machineImage: ec2.MachineImage.latestAmazonLinux({
-        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
-      }),
+      machineImage: ec2.MachineImage.latestAmazonLinux2023(),
       userData: zombieUserData,
       userDataCausesReplacement: true,
     });

@@ -18,12 +18,12 @@ export class PortforwadingStack extends cdk.Stack {
         {
           cidrMask: 24,
           name: "private",
-          subnetType: ec2.SubnetType.PRIVATE,
+          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
         },
         {
           cidrMask: 24,
           name: "database",
-          subnetType: ec2.SubnetType.ISOLATED,
+          subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
         },
       ],
     });
@@ -44,7 +44,7 @@ export class PortforwadingStack extends cdk.Stack {
       allocatedStorage: 20,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       vpcSubnets: {
-        subnetType: ec2.SubnetType.ISOLATED,
+        subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
       },
     });
 

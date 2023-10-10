@@ -15,7 +15,7 @@ export class VpcStack extends cdk.Stack {
 
     // VPC
     const vpc = new ec2.Vpc(this, "vpc", {
-      cidr: "10.0.0.0/16",
+      ipAddresses: ec2.IpAddresses.cidr("10.0.0.0/16"),
       subnetConfiguration: [],
       natGateways: 0,
     });
@@ -176,9 +176,7 @@ export class VpcStack extends cdk.Stack {
         ec2.InstanceClass.T2,
         ec2.InstanceSize.MICRO
       ),
-      machineImage: ec2.MachineImage.latestAmazonLinux({
-        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
-      }),
+      machineImage: ec2.MachineImage.latestAmazonLinux2023(),
       keyName: keyPair.valueAsString,
       vpcSubnets: {
         subnets: [publicSubnet1],

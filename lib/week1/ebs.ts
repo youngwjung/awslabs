@@ -47,9 +47,7 @@ export class EbsStack extends cdk.Stack {
         ec2.InstanceClass.T2,
         ec2.InstanceSize.MICRO
       ),
-      machineImage: ec2.MachineImage.latestAmazonLinux({
-        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
-      }),
+      machineImage: ec2.MachineImage.latestAmazonLinux2023(),
       userData: userData,
       keyName: keyPair.valueAsString,
       role: role,

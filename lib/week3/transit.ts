@@ -9,7 +9,7 @@ export class TransitStack extends cdk.Stack {
 
     // VPC
     const vpcA = new ec2.Vpc(this, "vpcA", {
-      cidr: "10.0.0.0/16",
+      ipAddresses: ec2.IpAddresses.cidr("10.0.0.0/16"),
       maxAzs: 1,
       subnetConfiguration: [
         {
@@ -22,7 +22,7 @@ export class TransitStack extends cdk.Stack {
     });
 
     const vpcB = new ec2.Vpc(this, "vpcB", {
-      cidr: "10.1.0.0/16",
+      ipAddresses: ec2.IpAddresses.cidr("10.1.0.0/16"),
       maxAzs: 1,
       subnetConfiguration: [
         {
@@ -35,7 +35,7 @@ export class TransitStack extends cdk.Stack {
     });
 
     const vpcC = new ec2.Vpc(this, "vpcC", {
-      cidr: "10.2.0.0/16",
+      ipAddresses: ec2.IpAddresses.cidr("10.2.0.0/16"),
       maxAzs: 1,
       subnetConfiguration: [
         {
@@ -53,9 +53,7 @@ export class TransitStack extends cdk.Stack {
         ec2.InstanceClass.T2,
         ec2.InstanceSize.MICRO
       ),
-      machineImage: ec2.MachineImage.latestAmazonLinux({
-        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
-      }),
+      machineImage: ec2.MachineImage.latestAmazonLinux2023(),
       instanceName: "A",
       vpcSubnets: {
         subnets: [vpcA.publicSubnets[0]],
@@ -74,9 +72,7 @@ export class TransitStack extends cdk.Stack {
         ec2.InstanceClass.T2,
         ec2.InstanceSize.MICRO
       ),
-      machineImage: ec2.MachineImage.latestAmazonLinux({
-        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
-      }),
+      machineImage: ec2.MachineImage.latestAmazonLinux2023(),
       instanceName: "B",
       vpcSubnets: {
         subnets: [vpcB.isolatedSubnets[0]],
@@ -89,9 +85,7 @@ export class TransitStack extends cdk.Stack {
         ec2.InstanceClass.T2,
         ec2.InstanceSize.MICRO
       ),
-      machineImage: ec2.MachineImage.latestAmazonLinux({
-        generation: ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
-      }),
+      machineImage: ec2.MachineImage.latestAmazonLinux2023(),
       instanceName: "C",
       vpcSubnets: {
         subnets: [vpcC.isolatedSubnets[0]],
