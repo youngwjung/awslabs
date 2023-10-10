@@ -63,9 +63,7 @@ export class AlblogStack extends cdk.Stack {
     instance.connections.allowFrom(lb, ec2.Port.tcp(80));
 
     const zombieUserData = ec2.UserData.forLinux();
-    zombieUserData.addCommands(
-      "yum update -y && yum install -y python3 python3-devel gcc"
-    );
+    zombieUserData.addCommands("python3 -m ensurepip --upgrade");
     zombieUserData.addCommands("pip3 install locust");
     zombieUserData.addCommands(
       "cat <<EOF >> /home/ec2-user/locust.py",
