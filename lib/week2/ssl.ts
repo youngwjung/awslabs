@@ -34,9 +34,12 @@ export class SslStack extends cdk.Stack {
 
     const userData = ec2.UserData.forLinux();
     userData.addCommands(
-      "yum update -y && yum install -y httpd git mod_wsgi python3-3.7*"
+      "yum update -y && yum install -y httpd git python3-pip httpd-devel python3-devel"
     );
-    userData.addCommands("pip3 install Flask==1.1.4");
+    userData.addCommands("pip3 install Flask==1.1.4 mod_wsgi");
+    userData.addCommands(
+      "mod_wsgi-express module-config > /etc/httpd/conf.d/wsgi.conf"
+    );
     userData.addCommands(
       "git clone https://github.com/youngwjung/flask-ssl.git /var/www/html/"
     );
