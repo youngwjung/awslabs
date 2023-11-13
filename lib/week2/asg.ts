@@ -21,7 +21,7 @@ export class AsgStack extends cdk.Stack {
     const userData = ec2.UserData.forLinux();
     userData.addCommands("yum update -y && yum install -y httpd");
     userData.addCommands(
-      "curl http://169.254.169.254/latest/meta-data/public-ipv4 > /tmp/ip.txt"
+      'TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` && curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/public-ipv4 > /tmp/ip.txt'
     );
     userData.addCommands("cp /tmp/ip.txt /var/www/html/index.html");
     userData.addCommands("## Simulate booting time by sleep command");
