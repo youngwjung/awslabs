@@ -49,8 +49,8 @@ export class PresignedStack extends cdk.Stack {
     );
 
     const userData = ec2.UserData.forLinux();
-    userData.addCommands("amazon-linux-extras install -y nginx1");
-    userData.addCommands("yum install -y git python3-3.7*");
+    userData.addCommands("dnf update -y && dnf install nginx git -y");
+    userData.addCommands("python3 -m ensurepip --upgrade");
     userData.addCommands(
       "cd /home/ec2-user/ && git clone https://github.com/youngwjung/s3-presigned-url.git"
     );
