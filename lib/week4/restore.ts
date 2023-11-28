@@ -47,11 +47,16 @@ export class RestoreStack extends cdk.Stack {
     );
 
     const tempUserData = ec2.UserData.forLinux();
-    tempUserData.addCommands("yum install -y mysql jq");
+    tempUserData.addCommands(
+      "dnf update -y && dnf install -y mariadb105-server"
+    );
+    tempUserData.addCommands(
+      'TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"`'
+    );
     tempUserData.addCommands(
       `aws secretsmanager get-secret-value --secret-id ${
         mysql.secret!.secretName
-      } --region $(curl http://169.254.169.254/latest/meta-data/placement/region) | jq -r '.SecretString' > /tmp/db_credentials`
+      } --region $(curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/placement/region) | jq -r '.SecretString' > /tmp/db_credentials`
     );
     tempUserData.addCommands(
       "aws s3 cp s3://youngwjung/awslabs/week4-restore.sh /home/ec2-user/",
